@@ -97,9 +97,9 @@ class Quick(object):
                 command = None
                 if filename.endswith('.zip'):
                     if verbose:
-                        command = ['unzip', os.path.join(BINARIES, filename), '-d', TARGET]
+                        command = ['unzip', '-o', os.path.join(BINARIES, filename), '-d', TARGET]
                     else:
-                        command = ['unzip', '-q', os.path.join(BINARIES, filename), '-d', TARGET]
+                        command = ['unzip', '-qo', os.path.join(BINARIES, filename), '-d', TARGET]
                 else:
                     if verbose:
                         command = ['tar', 'xvf', os.path.join(BINARIES, filename), '-C', TARGET]
@@ -198,7 +198,9 @@ class Quick(object):
         if not os.path.exists(INSTALLED):
             open(INSTALLED, 'w').close()
         for installed in open(INSTALLED).read().splitlines():
-            print(installed)
+            field = installed.split(' ')
+            name, version = field[0:2]
+            print(name + " " + version)
 
     def remove(self, args):
         # TODO
@@ -228,11 +230,15 @@ class Quick(object):
 
     def __init__(self):
         self.packages = {}
+        self.folders = {}
         if not os.path.exists(INSTALLED):
             open(INSTALLED, 'w').close()
         for installed in open(INSTALLED).read().splitlines():
-            package, version = installed.split(' ')
-            self.packages[package] = version
+            field = installed.split(' ')
+            name, version = field[0:2]
+            folder = ' '.join(field[2:])
+            self.packages[name] = version
+            self.packages[name] = folder
 
         parser = argparse.ArgumentParser(prog='quick', description='Quick is an installation helper to download and install binary packages from Internet to ~/.local')
         subparsers = parser.add_subparsers()
@@ -272,7 +278,8 @@ class Quick(object):
         command = subparsers.add_parser('remove', help='remove is identical to install except that packages are removed instead of installed.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
-        command.add_argument('packages', nargs='+')
+        command.add_argument("-a", "--all", help="remove all packages.", action="store_true")
+        command.add_argument('packages', nargs='*')
         command.set_defaults(func=self.remove, parser=parser)
 
         command = subparsers.add_parser('upgrade', help='upgrade is used to install the newest versions of all packages currently installed.')

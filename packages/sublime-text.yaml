@@ -12,3 +12,4 @@ DesktopFile:
   Exec: bin/subl
   Categories: Development;
   Icon: lib/Sublime Text 2/Icon/256x256/sublime_text.png
+Folder: Sublime Text 2
