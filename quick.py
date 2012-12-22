@@ -16,9 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, os, sys, urllib, yaml
+import argparse, os, stat, sys, urllib, yaml
 
 QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
+PROGRAM = os.path.join(os.getenv('HOME'), '.local', 'bin', 'quick')
 REMOTE = 'https://raw.github.com/fourdollars/quick/master/packages/'
 DATA = os.path.join(os.getenv('HOME'), '.local', 'share', 'quick')
 INDEX = os.path.join(DATA, 'index')
@@ -75,10 +76,12 @@ class Quick(object):
 
     def self_upgrade(self, args):
         if args.verbose:
-            print('Fetching ' + QUICK + ' and saving to ' + os.path.join(os.getenv('HOME'), '.local', 'bin', 'quick'))
+            print('Fetching ' + QUICK + ' and saving to ' + PROGRAM)
         elif not args.quiet:
             print('Fetching ' + QUICK)
-        urllib.urlretrieve(QUICK, os.path.join(os.getenv('HOME'), '.local', 'bin', 'quick'))
+        urllib.urlretrieve(QUICK, PROGRAM)
+        st = os.stat(PROGRAM)
+        os.chmod(PROGRAM, st.st_mode | stat.S_IEXEC)
 
     def __init__(self):
         parser = argparse.ArgumentParser(prog='quick', description='quick is an installation helper to download and install binary packages from Internet to ~/.local')
