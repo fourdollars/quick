@@ -22,14 +22,15 @@ QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
 PROGRAM = os.path.join(os.getenv('HOME'), '.local', 'bin', 'quick')
 REMOTE = 'https://raw.github.com/fourdollars/quick/master/packages/'
 DATA = os.path.join(os.getenv('HOME'), '.local', 'share', 'quick')
-INDEX = os.path.join(DATA, 'index')
+PACKAGES = os.path.join(DATA, 'packages')
+INDEX = os.path.join(PACKAGES, 'index')
 INSTALLED = os.path.join(DATA, 'installed')
 
 class Quick(object):
 
     def update(self, args):
-        if not os.path.exists(DATA):
-            os.makedirs(DATA)
+        if not os.path.exists(PACKAGES):
+            os.makedirs(PACKAGES)
         if args.verbose:
             print('[INDEX] Fetching ' + REMOTE + 'index' + ' and saving to ' + INDEX)
         elif not args.quiet:
@@ -38,15 +39,15 @@ class Quick(object):
         lines = open(INDEX).read().splitlines()
         for i, line in enumerate(lines):
             if args.verbose:
-                print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line + ' and saving to ' + os.path.join(DATA, line))
+                print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line + ' and saving to ' + os.path.join(PACKAGES, line))
             elif not args.quiet:
                 print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line)
-            urllib.urlretrieve(REMOTE + line, os.path.join(DATA, line))
+            urllib.urlretrieve(REMOTE + line, os.path.join(PACKAGES, line))
 
     def list(self, args):
-        for line in open(INDEX).read().splitlines():
-            pkg = yaml.load(open(os.path.join(DATA, line)).read())
-            print(line.split('.')[0] + " - " + pkg['Description'])
+        for pkg in open(INDEX).read().splitlines():
+            data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
+            print(pkg.split('.')[0] + " - " + data['Description'])
 
     def search(self, args):
         if args.packages:
@@ -56,8 +57,8 @@ class Quick(object):
     def info(self, args):
         if args.packages:
             for pkg in args.packages:
-                if os.path.exists(os.path.join(DATA, pkg + '.yaml')):
-                    data = yaml.load(open(os.path.join(DATA, pkg + '.yaml')).read())
+                if os.path.exists(os.path.join(PACKAGES, pkg + '.yaml')):
+                    data = yaml.load(open(os.path.join(PACKAGES, pkg + '.yaml')).read())
                     print('Package: ' + pkg)
                     for field in ['Name', 'Description', 'Version', 'Homepage']:
                         print(field + ': ' + data[field])
@@ -85,12 +86,12 @@ class Quick(object):
         os.chmod(PROGRAM, st.st_mode | stat.S_IEXEC)
 
     def clean(self, args):
-        if os.path.exists(DATA):
-            shutil.rmtree(DATA)
-            os.makedirs(DATA)
+        if os.path.exists(PACKAGES):
+            shutil.rmtree(PACKAGES)
+            os.makedirs(PACKAGES)
 
     def __init__(self):
-        parser = argparse.ArgumentParser(prog='quick', description='quick is an installation helper to download and install binary packages from Internet to ~/.local')
+        parser = argparse.ArgumentParser(prog='quick', description='Quick is an installation helper to download and install binary packages from Internet to ~/.local')
         parser.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         parser.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         subparsers = parser.add_subparsers()
