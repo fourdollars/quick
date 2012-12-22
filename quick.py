@@ -144,10 +144,10 @@ class Quick(object):
 
     def update(self, args):
         if args.verbose:
-            print('[INDEX] Fetching ' + REMOTE + 'index' + ' and saving to ' + INDEX)
+            print('[INDEX] Fetching ' + REMOTE + '.index' + ' and saving to ' + INDEX)
         elif not args.quiet:
-            print('[INDEX] Fetching ' + REMOTE + 'index')
-        urllib.urlretrieve(REMOTE + 'index', INDEX)
+            print('[INDEX] Fetching ' + REMOTE + '.index')
+        urllib.urlretrieve(REMOTE + '.index', INDEX)
         lines = open(INDEX).read().splitlines()
         for i, line in enumerate(lines):
             if args.verbose:
