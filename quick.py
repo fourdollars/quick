@@ -45,7 +45,7 @@ class Quick(object):
             if re.search(pattern, pkg):
                 found = True
             else:
-                for field in ['Name', 'Description', 'Homepage']:
+                for field in ['Name', 'Description']:
                     if re.search(pattern, data[field]):
                         found = True
                         break
