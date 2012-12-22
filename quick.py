@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, os, shutil, stat, sys, urllib, yaml
+import argparse, os, re, shutil, stat, sys, urllib, yaml
 
 QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
 PROGRAM = os.path.join(os.getenv('HOME'), '.local', 'bin', 'quick')
@@ -27,6 +27,15 @@ INDEX = os.path.join(PACKAGES, 'index')
 INSTALLED = os.path.join(DATA, 'installed')
 
 class Quick(object):
+
+    def showpkg(self, name):
+        if os.path.exists(os.path.join(PACKAGES, name + '.yaml')):
+            data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
+            print('Package: ' + name)
+            for field in ['Name', 'Description', 'Version', 'Homepage']:
+                print(field + ': ' + data[field])
+        else:
+            print(name + ' is not existed.')
 
     def update(self, args):
         if not os.path.exists(PACKAGES):
@@ -50,20 +59,24 @@ class Quick(object):
             print(pkg.split('.')[0] + " - " + data['Description'])
 
     def search(self, args):
-        if args.packages:
-            for pkg in args.packages:
-                print("Search " + pkg)
+        if args.re:
+            for pkg in open(INDEX).read().splitlines():
+                found = False
+                data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
+                if re.search(args.re, pkg):
+                    found = True
+                else:
+                    for field in ['Name', 'Description', 'Homepage']:
+                        if re.search(args.re, data[field]):
+                            found = True
+                            break
+                if found:
+                    self.showpkg(pkg.split('.')[0])
 
     def info(self, args):
         if args.packages:
             for pkg in args.packages:
-                if os.path.exists(os.path.join(PACKAGES, pkg + '.yaml')):
-                    data = yaml.load(open(os.path.join(PACKAGES, pkg + '.yaml')).read())
-                    print('Package: ' + pkg)
-                    for field in ['Name', 'Description', 'Version', 'Homepage']:
-                        print(field + ': ' + data[field])
-                else:
-                    print(pkg + ' is not existed.')
+                self.showpkg(pkg)
 
     def install(self, args):
         for pkg in args.packages:
@@ -109,7 +122,7 @@ class Quick(object):
         command = subparsers.add_parser('search', help='search performs a full text search on all available package lists.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
-        command.add_argument('packages', nargs='+')
+        command.add_argument('re')
         command.set_defaults(func=self.search, parser=parser)
 
         command = subparsers.add_parser('info', help='info is used to display information about the packages listed on the command line.')
