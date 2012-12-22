@@ -27,8 +27,9 @@ DESKTOP = os.path.join(BASE, 'share', 'applications')
 TARGET = os.path.join(BASE, 'lib')
 PACKAGES = os.path.join(DATA, 'packages')
 BINARIES = os.path.join(DATA, 'binaries')
-INDEX = os.path.join(PACKAGES, 'index')
+INDEX = os.path.join(PACKAGES, '.index')
 INSTALLED = os.path.join(DATA, 'installed')
+INSTALLED_INDEX = os.path.join(INSTALLED, '.index')
 
 
 class Quick(object):
@@ -122,8 +123,6 @@ class Quick(object):
                         if verbose:
                             print('Creating a desktop file ' + os.path.join(DESKTOP, pkg + '.desktop'))
                         desktop = data['DesktopFile']
-                        if not os.path.exists(DESKTOP):
-                            os.makedirs(DESKTOP)
                         with open(os.path.join(DESKTOP, pkg + '.desktop'), "w") as desktopfile:
                             desktopfile.write("[Desktop Entry]\n")
                             desktopfile.write("Type=Application\n")
@@ -137,15 +136,13 @@ class Quick(object):
                                 desktopfile.write("Icon=" + os.path.join(BASE, desktop['Icon']) + "\n")
                             desktopfile.write("Terminal=false\n")
                             desktopfile.write("StartupNotify=true\n")
-                    with open(INSTALLED, "w") as installed:
+                    with open(INSTALLED_INDEX, "w") as installed:
                         for k, v in self.packages.iteritems():
                             installed.write(k + " " + v + "\n")
                     if not quiet:
                         print(pkg + " installation complete.")
 
     def update(self, args):
-        if not os.path.exists(PACKAGES):
-            os.makedirs(PACKAGES)
         if args.verbose:
             print('[INDEX] Fetching ' + REMOTE + 'index' + ' and saving to ' + INDEX)
         elif not args.quiet:
@@ -177,10 +174,6 @@ class Quick(object):
                 self.showpkg(pkg)
 
     def install(self, args):
-        if not os.path.exists(BINARIES):
-            os.makedirs(BINARIES)
-        if not os.path.exists(INSTALLED):
-            open(INSTALLED, 'w').close()
         for pkg in args.packages:
             for name in open(INDEX).read().splitlines():
                 name = name.split('.')[0]
@@ -188,16 +181,14 @@ class Quick(object):
                     if args.force:
                         self.installpkg(pkg, args.quiet, args.verbose)
                     else:
-                        for installed in open(INSTALLED).read().splitlines():
+                        for installed in open(INSTALLED_INDEX).read().splitlines():
                             if installed.split(' ')[0] == name and not self.installable(name):
                                 print(name + " is the latest version.")
                                 break
                         else:
                             self.installpkg(pkg, args.quiet, args.verbose)
     def installed(self, args):
-        if not os.path.exists(INSTALLED):
-            open(INSTALLED, 'w').close()
-        for installed in open(INSTALLED).read().splitlines():
+        for installed in open(INSTALLED_INDEX).read().splitlines():
             field = installed.split(' ')
             name, version = field[0:2]
             print(name + " " + version)
@@ -228,17 +219,27 @@ class Quick(object):
             shutil.rmtree(BINARIES)
             os.makedirs(BINARIES)
 
+    def sanity_check(self):
+        if not os.path.exists(PACKAGES):
+            os.makedirs(PACKAGES)
+        if not os.path.exists(BINARIES):
+            os.makedirs(BINARIES)
+        if not os.path.exists(DESKTOP):
+            os.makedirs(DESKTOP)
+        if not os.path.exists(INSTALLED):
+            os.makedirs(INSTALLED)
+        if not os.path.exists(INSTALLED_INDEX):
+            open(INSTALLED_INDEX, 'w').close()
+
     def __init__(self):
         self.packages = {}
-        self.folders = {}
-        if not os.path.exists(INSTALLED):
-            open(INSTALLED, 'w').close()
-        for installed in open(INSTALLED).read().splitlines():
+
+        self.sanity_check()
+
+        for installed in open(INSTALLED_INDEX).read().splitlines():
             field = installed.split(' ')
-            name, version = field[0:2]
-            folder = ' '.join(field[2:])
+            name, version = field
             self.packages[name] = version
-            self.packages[name] = folder
 
         parser = argparse.ArgumentParser(prog='quick', description='Quick is an installation helper to download and install binary packages from Internet to ~/.local')
         subparsers = parser.add_subparsers()
