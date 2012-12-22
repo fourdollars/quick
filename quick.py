@@ -58,6 +58,11 @@ class Quick(object):
 
         return match
 
+    def installpkg(self, pkg, quiet=False):
+        data = yaml.load(open(os.path.join(PACKAGES, pkg + '.yaml')).read())
+        print(data['Downloads'])
+        # TODO
+
     def update(self, args):
         if not os.path.exists(PACKAGES):
             os.makedirs(PACKAGES)
@@ -92,9 +97,16 @@ class Quick(object):
                 self.showpkg(pkg)
 
     def install(self, args):
-        # TODO
+        if not os.path.exists(INSTALLED):
+            open(INSTALLED, 'w').close()
         for pkg in args.packages:
-            print("Install " + pkg)
+            for name in open(INDEX).read().splitlines():
+                if name.split('.')[0] == pkg:
+                    for installed in open(INSTALLED).read().splitlines():
+                        if installed.split(' ')[0] == name:
+                            break
+                    else:
+                        self.installpkg(pkg, args.quiet)
 
     def remove(self, args):
         # TODO
