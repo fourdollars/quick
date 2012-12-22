@@ -37,6 +37,27 @@ class Quick(object):
         else:
             print(name + ' is not existed.')
 
+    def searchpkg(self, pattern):
+        found = False
+        match = []
+        for pkg in open(INDEX).read().splitlines():
+            data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
+            if re.search(pattern, pkg):
+                found = True
+            else:
+                for field in ['Name', 'Description', 'Homepage']:
+                    if re.search(pattern, data[field]):
+                        found = True
+                        break
+            if found:
+                for name in match:
+                    if name == pkg.split('.')[0]:
+                        break
+                else:
+                    match.append(pkg.split('.')[0])
+
+        return match
+
     def update(self, args):
         if not os.path.exists(PACKAGES):
             os.makedirs(PACKAGES)
@@ -59,19 +80,11 @@ class Quick(object):
             print(pkg.split('.')[0] + " - " + data['Description'])
 
     def search(self, args):
-        if args.re:
-            for pkg in open(INDEX).read().splitlines():
-                found = False
-                data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
-                if re.search(args.re, pkg):
-                    found = True
-                else:
-                    for field in ['Name', 'Description', 'Homepage']:
-                        if re.search(args.re, data[field]):
-                            found = True
-                            break
-                if found:
-                    self.showpkg(pkg.split('.')[0])
+        if args.pattern:
+            names = self.searchpkg(args.pattern)
+            for name in names:
+                self.showpkg(name)
+                print('')
 
     def info(self, args):
         if args.packages:
@@ -79,14 +92,17 @@ class Quick(object):
                 self.showpkg(pkg)
 
     def install(self, args):
+        # TODO
         for pkg in args.packages:
             print("Install " + pkg)
 
     def remove(self, args):
+        # TODO
         for pkg in args.packages:
             print("Remove " + pkg)
 
     def upgrade(self, args):
+        # TODO
         print("Upgrade all packages.")
 
     def self_upgrade(self, args):
@@ -122,7 +138,7 @@ class Quick(object):
         command = subparsers.add_parser('search', help='search performs a full text search on all available package lists.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
-        command.add_argument('re')
+        command.add_argument('pattern')
         command.set_defaults(func=self.search, parser=parser)
 
         command = subparsers.add_parser('info', help='info is used to display information about the packages listed on the command line.')
