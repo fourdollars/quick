@@ -53,24 +53,20 @@ class Quick(object):
             print(name + ' is not existed.')
 
     def searchpkg(self, pattern):
-        found = False
         match = []
         for pkg in open(INDEX).read().splitlines():
+            found = False
             data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
-            if re.search(pattern, pkg):
+            if re.search(pattern, pkg, re.IGNORECASE):
                 found = True
             else:
                 for field in ['Name', 'Description']:
-                    if re.search(pattern, data[field]):
+                    if re.search(pattern, data[field], re.IGNORECASE):
                         found = True
                         break
             if found:
-                for name in match:
-                    if name == pkg.split('.')[0]:
-                        break
-                else:
+                if not pkg.split('.')[0] in match:
                     match.append(pkg.split('.')[0])
-
         return match
 
     def installpkg(self, pkg, quiet=False, verbose=False):
