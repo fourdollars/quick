@@ -25,7 +25,7 @@ fi
 ENDLINE
 fi
 
-for path in "$HOME/.local/bin" "$HOME/.local/lib" "$HOME/.local/share/quick"; do
+for path in "$HOME/.local/bin" "$HOME/.local/lib" "$HOME/.local/share/quick/packages" "$HOME/.local/share/quick/binaries"; do
     if [ ! -d $path ]; then
         mkdir -p $path
     fi

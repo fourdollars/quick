@@ -1,5 +1,3 @@
-*Under Construction*
-
 # Quick installation helper
 
 ## Intrdoduction
@@ -11,6 +9,9 @@ Quick is an installation helper to download and install binary packages from Int
 * bash
 * python (2.7.x)
 * python-yaml
+* python-pkg-resources
+* tar
+* unzip
 * wget
 
 ## Installation
@@ -18,3 +19,5 @@ Quick is an installation helper to download and install binary packages from Int
     $ wget https://raw.github.com/fourdollars/quick/master/quick-installer.sh -O - | bash -
 
 ## Usage
+
+    $ quick

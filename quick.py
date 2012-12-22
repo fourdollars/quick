@@ -16,17 +16,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, os, re, shutil, stat, sys, urllib, yaml
+import argparse, os, re, shutil, stat, subprocess, sys, urllib, yaml
 
 QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
-PROGRAM = os.path.join(os.getenv('HOME'), '.local', 'bin', 'quick')
 REMOTE = 'https://raw.github.com/fourdollars/quick/master/packages/'
-DATA = os.path.join(os.getenv('HOME'), '.local', 'share', 'quick')
+BASE = os.path.join(os.getenv('HOME'), '.local')
+PROGRAM = os.path.join(BASE, 'bin', 'quick')
+DATA = os.path.join(BASE, 'share', 'quick')
+DESKTOP = os.path.join(BASE, 'share', 'applications')
+TARGET = os.path.join(BASE, 'lib')
 PACKAGES = os.path.join(DATA, 'packages')
+BINARIES = os.path.join(DATA, 'binaries')
 INDEX = os.path.join(PACKAGES, 'index')
 INSTALLED = os.path.join(DATA, 'installed')
 
+
 class Quick(object):
+
+    def installable(self, name):
+        if not os.path.exists(os.path.join(PACKAGES, name + '.yaml')):
+            return False
+        if not name in self.packages:
+            return True
+        from pkg_resources import parse_version
+        data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
+        return parse_version(data['Version']) > parse_version(self.packages[name])
 
     def showpkg(self, name):
         if os.path.exists(os.path.join(PACKAGES, name + '.yaml')):
@@ -58,10 +72,76 @@ class Quick(object):
 
         return match
 
-    def installpkg(self, pkg, quiet=False):
+    def installpkg(self, pkg, quiet=False, verbose=False):
         data = yaml.load(open(os.path.join(PACKAGES, pkg + '.yaml')).read())
-        print(data['Downloads'])
-        # TODO
+        for item in data['Downloads']:
+            url = None
+            arch = None
+            sha1 = None
+            try:
+                # TODO: check sha1sum
+                url, arch, sha1 = item.split(' ')
+            except:
+                url, arch = item.split(' ')
+            if arch == 'all' or arch == os.uname()[4]:
+                filename = os.path.basename(url)
+                # Don't download binary package again.
+                if not os.path.exists(os.path.join(BINARIES, filename)):
+                    if verbose:
+                        print('Downloading ' + url + ' to ' + os.path.join(BINARIES, filename))
+                    elif not quiet:
+                        print('Downloading ' + url)
+                    urllib.urlretrieve(url, os.path.join(BINARIES, filename))
+                if verbose:
+                    print('Uncompressing ' + filename)
+                command = None
+                if filename.endswith('.zip'):
+                    if verbose:
+                        command = ['unzip', os.path.join(BINARIES, filename), '-d', TARGET]
+                    else:
+                        command = ['unzip', '-q', os.path.join(BINARIES, filename), '-d', TARGET]
+                else:
+                    if verbose:
+                        command = ['tar', 'xvf', os.path.join(BINARIES, filename), '-C', TARGET]
+                    else:
+                        command = ['tar', 'xf', os.path.join(BINARIES, filename), '-C', TARGET]
+                if subprocess.call(command) == 0:
+                    self.packages[pkg] = data['Version']
+                    # Create symbolic links
+                    if 'Links' in data:
+                        for k, v in data['Links'].iteritems():
+                            source = os.path.join(BASE, v)
+                            target = os.path.join(BASE, k)
+                            if verbose:
+                                print('Creating a symbolic link ' + target + ' -> ' + source)
+                            if os.path.exists(target):
+                                os.remove(target)
+                            os.symlink(source, target)
+                    # Create desktop files
+                    if 'DesktopFile' in data and 'Exec' in data['DesktopFile']:
+                        if verbose:
+                            print('Creating a desktop file ' + os.path.join(DESKTOP, pkg + '.desktop'))
+                        desktop = data['DesktopFile']
+                        if not os.path.exists(DESKTOP):
+                            os.makedirs(DESKTOP)
+                        with open(os.path.join(DESKTOP, pkg + '.desktop'), "w") as desktopfile:
+                            desktopfile.write("[Desktop Entry]\n")
+                            desktopfile.write("Type=Application\n")
+                            desktopfile.write("Name=" + data['Name'] + "\n")
+                            if 'Comment' in desktop:
+                                desktopfile.write("Comment=" + desktop['Comment'] + "\n")
+                            if 'Categories' in desktop:
+                                desktopfile.write("Categories=" + desktop['Categories'] + "\n")
+                            desktopfile.write("Exec=" + os.path.join(BASE, desktop['Exec']) + "\n")
+                            if 'Icon' in desktop:
+                                desktopfile.write("Icon=" + os.path.join(BASE, desktop['Icon']) + "\n")
+                            desktopfile.write("Terminal=false\n")
+                            desktopfile.write("StartupNotify=true\n")
+                    with open(INSTALLED, "w") as installed:
+                        for k, v in self.packages.iteritems():
+                            installed.write(k + " " + v + "\n")
+                    if not quiet:
+                        print(pkg + " installation complete.")
 
     def update(self, args):
         if not os.path.exists(PACKAGES):
@@ -97,16 +177,28 @@ class Quick(object):
                 self.showpkg(pkg)
 
     def install(self, args):
+        if not os.path.exists(BINARIES):
+            os.makedirs(BINARIES)
         if not os.path.exists(INSTALLED):
             open(INSTALLED, 'w').close()
         for pkg in args.packages:
             for name in open(INDEX).read().splitlines():
-                if name.split('.')[0] == pkg:
-                    for installed in open(INSTALLED).read().splitlines():
-                        if installed.split(' ')[0] == name:
-                            break
+                name = name.split('.')[0]
+                if name == pkg:
+                    if args.force:
+                        self.installpkg(pkg, args.quiet, args.verbose)
                     else:
-                        self.installpkg(pkg, args.quiet)
+                        for installed in open(INSTALLED).read().splitlines():
+                            if installed.split(' ')[0] == name and not self.installable(name):
+                                print(name + " is the latest version.")
+                                break
+                        else:
+                            self.installpkg(pkg, args.quiet, args.verbose)
+    def installed(self, args):
+        if not os.path.exists(INSTALLED):
+            open(INSTALLED, 'w').close()
+        for installed in open(INSTALLED).read().splitlines():
+            print(installed)
 
     def remove(self, args):
         # TODO
@@ -130,11 +222,19 @@ class Quick(object):
         if os.path.exists(PACKAGES):
             shutil.rmtree(PACKAGES)
             os.makedirs(PACKAGES)
+        if os.path.exists(BINARIES):
+            shutil.rmtree(BINARIES)
+            os.makedirs(BINARIES)
 
     def __init__(self):
+        self.packages = {}
+        if not os.path.exists(INSTALLED):
+            open(INSTALLED, 'w').close()
+        for installed in open(INSTALLED).read().splitlines():
+            package, version = installed.split(' ')
+            self.packages[package] = version
+
         parser = argparse.ArgumentParser(prog='quick', description='Quick is an installation helper to download and install binary packages from Internet to ~/.local')
-        parser.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
-        parser.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         subparsers = parser.add_subparsers()
 
         command = subparsers.add_parser('update', help='update is used to resynchronize the package index files from their sources.')
@@ -162,8 +262,12 @@ class Quick(object):
         command = subparsers.add_parser('install', help='install is followed by one or more packages desired for installation or upgrading.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.add_argument("-f", "--force", help="force install.", action="store_true")
         command.add_argument('packages', nargs='+')
         command.set_defaults(func=self.install, parser=parser)
+
+        command = subparsers.add_parser('installed', help='list installed packages.')
+        command.set_defaults(func=self.installed, parser=parser)
 
         command = subparsers.add_parser('remove', help='remove is identical to install except that packages are removed instead of installed.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
