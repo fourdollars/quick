@@ -16,84 +16,123 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, os, sys, urllib
+import argparse, os, sys, urllib, yaml
 
+REMOTE = 'https://raw.github.com/fourdollars/quick/master/packages/'
 DATA = os.path.join(os.getenv('HOME'), '.local', 'share', 'quick')
 INDEX = os.path.join(DATA, 'index')
+INSTALLED = os.path.join(DATA, 'installed')
 
-def list(args):
-    print("List *")
+class Quick(object):
+    def list(self, args):
+        for line in open(INDEX).read().splitlines():
+            pkg = yaml.load(open(os.path.join(DATA, line)).read())
+            print(line.split('.')[0] + " - " + pkg['Description'])
 
-def search(args):
-    if args.packages:
+    def search(self, args):
+        if args.packages:
+            for pkg in args.packages:
+                print("Search " + pkg)
+
+    def info(self, args):
+        if args.packages:
+            for pkg in args.packages:
+                if os.path.exists(os.path.join(DATA, pkg + '.yaml')):
+                    data = yaml.load(open(os.path.join(DATA, pkg + '.yaml')).read())
+                    print('Package: ' + pkg)
+                    for field in ['Name', 'Description', 'Version', 'Homepage']:
+                        print(field + ': ' + data[field])
+                else:
+                    print(pkg + ' is not existed.')
+
+    def install(self, args):
         for pkg in args.packages:
-            print("Search " + pkg)
+            print("Install " + pkg)
 
-def info(args):
-    if args.packages:
+    def remove(self, args):
         for pkg in args.packages:
-            print("Info " + pkg)
+            print("Remove " + pkg)
 
-def install(args):
-    for pkg in args.packages:
-        print("Install " + pkg)
+    def update(self, args):
+        if not os.path.exists(DATA):
+            os.makedirs(DATA)
+        if args.verbose:
+            print('[INDEX] Fetching ' + REMOTE + 'index' + ' and saving to ' + INDEX)
+        elif not args.quiet:
+            print('[INDEX] Fetching ' + REMOTE + 'index')
+        urllib.urlretrieve(REMOTE + 'index', INDEX)
+        lines = open(INDEX).read().splitlines()
+        for i, line in enumerate(lines):
+            if args.verbose:
+                print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line + ' and saving to ' + os.path.join(DATA, line))
+            elif not args.quiet:
+                print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line)
+            urllib.urlretrieve(REMOTE + line, os.path.join(DATA, line))
 
-def remove(args):
-    for pkg in args.packages:
-        print("Remove " + pkg)
+    def upgrade(self, args):
+        print("Upgrade all packages.")
 
-def update(args):
-    if not os.path.exists(DATA):
-        os.makedirs(DATA)
-    urllib.urlretrieve('https://raw.github.com/fourdollars/quick/master/packages/index', INDEX)
+    def self_upgrade(self, args):
+        print("Self Upgrade")
 
-def upgrade(args):
-    print("Upgrade all packages.")
+    def __init__(self):
+        parser = argparse.ArgumentParser(prog='quick', description='quick is an installation helper to download and install binary packages from Internet to ~/.local')
+        parser.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        parser.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        subparsers = parser.add_subparsers()
 
-def self_upgrade(args):
-    print("Self Upgrade")
+        command = subparsers.add_parser('list', help='list prints out an available packages list to stdout.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.set_defaults(func=self.list, parser=parser)
 
-def main():
-    parser = argparse.ArgumentParser(prog='quick', description='quick is an installation helper to download and install binary packages from Internet to ~/.local')
-    parser.add_argument("--verbose", help="increase output verbosity.", action="store_true")
-    subparsers = parser.add_subparsers()
+        command = subparsers.add_parser('search', help='search performs a full text search on all available package lists.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.add_argument('packages', nargs='+')
+        command.set_defaults(func=self.search, parser=parser)
 
-    command = subparsers.add_parser('list', help='list prints out an available packages list to stdout.')
-    command.set_defaults(func=list, parser=parser)
+        command = subparsers.add_parser('info', help='info is used to display information about the packages listed on the command line.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.add_argument('packages', nargs='+')
+        command.set_defaults(func=self.info, parser=parser)
 
-    command = subparsers.add_parser('search', help='search performs a full text search on all available package lists.')
-    command.add_argument('packages', nargs='+')
-    command.set_defaults(func=search, parser=parser)
+        command = subparsers.add_parser('install', help='install is followed by one or more packages desired for installation or upgrading.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.add_argument('packages', nargs='+')
+        command.set_defaults(func=self.install, parser=parser)
 
-    command = subparsers.add_parser('info', help='info is used to display information about the packages listed on the command line.')
-    command.add_argument('packages', nargs='+')
-    command.set_defaults(func=info, parser=parser)
+        command = subparsers.add_parser('remove', help='remove is identical to install except that packages are removed instead of installed.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.add_argument('packages', nargs='+')
+        command.set_defaults(func=self.remove, parser=parser)
 
-    command = subparsers.add_parser('install', help='install is followed by one or more packages desired for installation or upgrading.')
-    command.add_argument('packages', nargs='+')
-    command.set_defaults(func=install, parser=parser)
+        command = subparsers.add_parser('update', help='update is used to resynchronize the package index files from their sources.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.set_defaults(func=self.update, parser=parser)
 
-    command = subparsers.add_parser('remove', help='remove is identical to install except that packages are removed instead of installed.')
-    command.add_argument('packages', nargs='+')
-    command.set_defaults(func=remove, parser=parser)
+        command = subparsers.add_parser('upgrade', help='upgrade is used to install the newest versions of all packages currently installed.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.set_defaults(func=self.upgrade, parser=parser)
 
-    command = subparsers.add_parser('update', help='update is used to resynchronize the package index files from their sources.')
-    command.set_defaults(func=update, parser=parser)
+        command = subparsers.add_parser('self-upgrade', help='self-upgrade is used to upgrade this program itself.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.set_defaults(func=self.self_upgrade, parser=parser)
 
-    command = subparsers.add_parser('upgrade', help='upgrade is used to install the newest versions of all packages currently installed.')
-    command.set_defaults(func=upgrade, parser=parser)
-
-    command = subparsers.add_parser('self-upgrade', help='self-upgrade is used to upgrade this program itself.')
-    command.set_defaults(func=self_upgrade, parser=parser)
-
-    if len(sys.argv) == 1:
-        parser.print_help()
-    else:
-        args = parser.parse_args()
-        if args:
-            args.func(args)
+        if len(sys.argv) == 1:
+            parser.print_help()
+        else:
+            args = parser.parse_args()
+            if args:
+                args.func(args)
 
 if __name__ == '__main__':
-    main()
+    Quick()
 
 # vim:fileencodings=utf-8:expandtab:tabstop=4:shiftwidth=4:softtabstop=4
