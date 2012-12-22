@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, os, stat, sys, urllib, yaml
+import argparse, os, shutil, stat, sys, urllib, yaml
 
 QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
 PROGRAM = os.path.join(os.getenv('HOME'), '.local', 'bin', 'quick')
@@ -26,6 +26,23 @@ INDEX = os.path.join(DATA, 'index')
 INSTALLED = os.path.join(DATA, 'installed')
 
 class Quick(object):
+
+    def update(self, args):
+        if not os.path.exists(DATA):
+            os.makedirs(DATA)
+        if args.verbose:
+            print('[INDEX] Fetching ' + REMOTE + 'index' + ' and saving to ' + INDEX)
+        elif not args.quiet:
+            print('[INDEX] Fetching ' + REMOTE + 'index')
+        urllib.urlretrieve(REMOTE + 'index', INDEX)
+        lines = open(INDEX).read().splitlines()
+        for i, line in enumerate(lines):
+            if args.verbose:
+                print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line + ' and saving to ' + os.path.join(DATA, line))
+            elif not args.quiet:
+                print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line)
+            urllib.urlretrieve(REMOTE + line, os.path.join(DATA, line))
+
     def list(self, args):
         for line in open(INDEX).read().splitlines():
             pkg = yaml.load(open(os.path.join(DATA, line)).read())
@@ -55,22 +72,6 @@ class Quick(object):
         for pkg in args.packages:
             print("Remove " + pkg)
 
-    def update(self, args):
-        if not os.path.exists(DATA):
-            os.makedirs(DATA)
-        if args.verbose:
-            print('[INDEX] Fetching ' + REMOTE + 'index' + ' and saving to ' + INDEX)
-        elif not args.quiet:
-            print('[INDEX] Fetching ' + REMOTE + 'index')
-        urllib.urlretrieve(REMOTE + 'index', INDEX)
-        lines = open(INDEX).read().splitlines()
-        for i, line in enumerate(lines):
-            if args.verbose:
-                print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line + ' and saving to ' + os.path.join(DATA, line))
-            elif not args.quiet:
-                print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line)
-            urllib.urlretrieve(REMOTE + line, os.path.join(DATA, line))
-
     def upgrade(self, args):
         print("Upgrade all packages.")
 
@@ -83,11 +84,21 @@ class Quick(object):
         st = os.stat(PROGRAM)
         os.chmod(PROGRAM, st.st_mode | stat.S_IEXEC)
 
+    def clean(self, args):
+        if os.path.exists(DATA):
+            shutil.rmtree(DATA)
+            os.makedirs(DATA)
+
     def __init__(self):
         parser = argparse.ArgumentParser(prog='quick', description='quick is an installation helper to download and install binary packages from Internet to ~/.local')
         parser.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         parser.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         subparsers = parser.add_subparsers()
+
+        command = subparsers.add_parser('update', help='update is used to resynchronize the package index files from their sources.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.set_defaults(func=self.update, parser=parser)
 
         command = subparsers.add_parser('list', help='list prints out an available packages list to stdout.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
@@ -118,11 +129,6 @@ class Quick(object):
         command.add_argument('packages', nargs='+')
         command.set_defaults(func=self.remove, parser=parser)
 
-        command = subparsers.add_parser('update', help='update is used to resynchronize the package index files from their sources.')
-        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
-        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
-        command.set_defaults(func=self.update, parser=parser)
-
         command = subparsers.add_parser('upgrade', help='upgrade is used to install the newest versions of all packages currently installed.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
@@ -132,6 +138,11 @@ class Quick(object):
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         command.set_defaults(func=self.self_upgrade, parser=parser)
+
+        command = subparsers.add_parser('clean', help='clean clears out the local repository of retrieved package files.')
+        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.set_defaults(func=self.clean, parser=parser)
 
         if len(sys.argv) == 1:
             parser.print_help()
