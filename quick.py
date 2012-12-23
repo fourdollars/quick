@@ -44,12 +44,15 @@ class Quick(object):
         data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
         return parse_version(data['Version']) > parse_version(self.packages[name])
 
-    def showpkg(self, name):
+    def showpkg(self, name, version=None):
         if os.path.exists(os.path.join(PACKAGES, name + '.yaml')):
             data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
             print('Package: ' + name)
             for field in ['Name', 'Description', 'Version', 'Homepage']:
-                print(field + ': ' + data[field])
+                if field is 'Version' and version:
+                    print(field + ': ' + version)
+                else:
+                    print(field + ': ' + data[field])
         else:
             print(name + ' is not existed.')
 
@@ -181,6 +184,7 @@ class Quick(object):
         if args.packages:
             for pkg in args.packages:
                 self.showpkg(pkg)
+                print('')
 
     def install(self, args):
         for pkg in args.packages:
@@ -200,7 +204,11 @@ class Quick(object):
         for installed in open(INSTALLED_INDEX).read().splitlines():
             field = installed.split(' ')
             name, version = field[0:2]
-            print(name + " " + version)
+            if args.verbose:
+                self.showpkg(name, version)
+                print('')
+            else:
+                print(name + " " + version)
 
     def remove(self, args):
         # TODO
@@ -283,6 +291,7 @@ class Quick(object):
         command.set_defaults(func=self.install, parser=parser)
 
         command = subparsers.add_parser('installed', help='list installed packages.')
+        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         command.set_defaults(func=self.installed, parser=parser)
 
         command = subparsers.add_parser('remove', help='remove is identical to install except that packages are removed instead of installed.')
