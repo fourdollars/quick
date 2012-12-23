@@ -19,18 +19,19 @@
 import argparse, os, re, shutil, stat, subprocess, sys, urllib, yaml
 
 QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
+INDEX = '.index'
 REMOTE = 'https://raw.github.com/fourdollars/quick/master/packages/'
+REMOTE_INDEX = REMOTE + INDEX
 BASE = os.path.join(os.getenv('HOME'), '.local')
 PROGRAM = os.path.join(BASE, 'bin', 'quick')
 DATA = os.path.join(BASE, 'share', 'quick')
 DESKTOP = os.path.join(BASE, 'share', 'applications')
 TARGET = os.path.join(BASE, 'lib')
 PACKAGES = os.path.join(DATA, 'packages')
-BINARIES = os.path.join(DATA, 'binaries')
-INDEX = os.path.join(PACKAGES, '.index')
+PAKCAGES_INDEX = os.path.join(PACKAGES, '.index')
 INSTALLED = os.path.join(DATA, 'installed')
 INSTALLED_INDEX = os.path.join(INSTALLED, '.index')
-
+BINARIES = os.path.join(DATA, 'binaries')
 
 class Quick(object):
 
@@ -54,7 +55,7 @@ class Quick(object):
 
     def searchpkg(self, pattern):
         match = []
-        for pkg in open(INDEX).read().splitlines():
+        for pkg in open(PAKCAGES_INDEX).read().splitlines():
             found = False
             data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
             if re.search(pattern, pkg, re.IGNORECASE):
@@ -140,11 +141,11 @@ class Quick(object):
 
     def update(self, args):
         if args.verbose:
-            print('[INDEX] Fetching ' + REMOTE + '.index' + ' and saving to ' + INDEX)
+            print('[INDEX] Fetching ' + REMOTE_INDEX + ' and saving to ' + PAKCAGES_INDEX)
         elif not args.quiet:
-            print('[INDEX] Fetching ' + REMOTE + '.index')
-        urllib.urlretrieve(REMOTE + '.index', INDEX)
-        lines = open(INDEX).read().splitlines()
+            print('[INDEX] Fetching ' + REMOTE_INDEX)
+        urllib.urlretrieve(REMOTE_INDEX, PAKCAGES_INDEX)
+        lines = open(PAKCAGES_INDEX).read().splitlines()
         for i, line in enumerate(lines):
             if args.verbose:
                 print('[' + str(i + 1) + '/' + str(len(lines)) + '] ' + 'Fetching ' + REMOTE + line + ' and saving to ' + os.path.join(PACKAGES, line))
@@ -153,7 +154,7 @@ class Quick(object):
             urllib.urlretrieve(REMOTE + line, os.path.join(PACKAGES, line))
 
     def list(self, args):
-        for pkg in open(INDEX).read().splitlines():
+        for pkg in open(PAKCAGES_INDEX).read().splitlines():
             data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
             print(pkg.split('.')[0] + " - " + data['Description'])
 
@@ -171,7 +172,7 @@ class Quick(object):
 
     def install(self, args):
         for pkg in args.packages:
-            for name in open(INDEX).read().splitlines():
+            for name in open(PAKCAGES_INDEX).read().splitlines():
                 name = name.split('.')[0]
                 if name == pkg:
                     if args.force:
