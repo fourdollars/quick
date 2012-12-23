@@ -2,6 +2,6 @@ Name: Google App Engine SDK for Java
 Description: Offers users the ability to build and host web applications on Google's infrastructure.
 Homepage: https://developers.google.com/appengine/
 Version: 1.7.4
-Downloads:
+Download:
   - http://googleappengine.googlecode.com/files/appengine-java-sdk-1.7.4.zip all 62fb9e7a6ed1bd2525741eca175e101c500399a2
 Folder: appengine-java-sdk-1.7.4

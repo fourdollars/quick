@@ -2,17 +2,17 @@ Name: Google App Engine SDK for Python
 Description: Offers users the ability to build and host web applications on Google's infrastructure.
 Homepage: https://developers.google.com/appengine/
 Version: 1.7.4
-Downloads:
+Download:
   - http://googleappengine.googlecode.com/files/google_appengine_1.7.4.zip all 05eaddb534e3cb1d002cdaa529ff75ef36a30026
 Folder: google_appengine
-Links:
-  bin/api_server: lib/google_appengine/api_server.py
-  bin/appcfg: lib/google_appengine/appcfg.py
-  bin/bulkload_client: lib/google_appengine/bulkload_client.py
-  bin/bulkloader: lib/google_appengine/bulkloader.py
-  bin/dev_appserver: lib/google_appengine/dev_appserver.py
-  bin/download_appstats: lib/google_appengine/download_appstats.py
-  bin/endpointscfg: lib/google_appengine/endpointscfg.py
-  bin/gen_protorpc: lib/google_appengine/gen_protorpc.py
-  bin/google_sql: lib/google_appengine/google_sql.py
-  bin/remote_api_shell: lib/google_appengine/remote_api_shell.py
+Symlink:
+  - api_server.py
+  - appcfg.py
+  - bulkload_client.py
+  - bulkloader.py
+  - dev_appserver.py
+  - download_appstats.py
+  - endpointscfg.py
+  - gen_protorpc.py
+  - google_sql.py
+  - remote_api_shell.py

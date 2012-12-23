@@ -26,7 +26,7 @@ BASE = os.path.join(os.getenv('HOME'), '.local')
 PROGRAM = os.path.join(BASE, 'bin', 'quick')
 DATA = os.path.join(BASE, 'share', 'quick')
 DESKTOP = os.path.join(BASE, 'share', 'applications')
-TARGET = os.path.join(BASE, 'lib')
+TARGET = os.path.join(BASE, 'lib', 'quick')
 PACKAGES = os.path.join(DATA, 'packages')
 PAKCAGES_INDEX = os.path.join(PACKAGES, '.index')
 INSTALLED = os.path.join(DATA, 'installed')
@@ -70,9 +70,14 @@ class Quick(object):
                     match.append(pkg.split('.')[0])
         return match
 
-    def installpkg(self, pkg, quiet=False, verbose=False):
-        data = yaml.load(open(os.path.join(PACKAGES, pkg + '.yaml')).read())
-        for item in data['Downloads']:
+    def installpkg(self, name, quiet=False, verbose=False):
+        data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
+        folder = ''
+        if 'Folder' in data:
+            folder = data['Folder']
+        target = os.path.join(TARGET, name)
+        command_succeed = False
+        for item in data['Download']:
             url = None
             arch = None
             sha1 = None
@@ -82,6 +87,9 @@ class Quick(object):
             except:
                 url, arch = item.split(' ')
             if arch == 'all' or arch == os.uname()[4]:
+                folder = ''
+                if 'Folder' in data:
+                    folder = data['Folder']
                 filename = os.path.basename(url)
                 # Don't download binary package again.
                 if not os.path.exists(os.path.join(BINARIES, filename)):
@@ -91,53 +99,57 @@ class Quick(object):
                         print('Downloading ' + url)
                     urllib.urlretrieve(url, os.path.join(BINARIES, filename))
                 if verbose:
-                    print('Uncompressing ' + filename)
+                    print('Uncompressing ' + filename + ' to ' + target)
+                if not os.path.exists(target):
+                    os.makedirs(target)
                 command = None
                 if filename.endswith('.zip'):
                     if verbose:
-                        command = ['unzip', '-o', os.path.join(BINARIES, filename), '-d', TARGET]
+                        command = ['unzip', '-o', os.path.join(BINARIES, filename), '-d', target]
                     else:
-                        command = ['unzip', '-qo', os.path.join(BINARIES, filename), '-d', TARGET]
+                        command = ['unzip', '-qo', os.path.join(BINARIES, filename), '-d', target]
                 else:
                     if verbose:
-                        command = ['tar', 'xvf', os.path.join(BINARIES, filename), '-C', TARGET]
+                        command = ['tar', 'xvf', os.path.join(BINARIES, filename), '-C', target]
                     else:
-                        command = ['tar', 'xf', os.path.join(BINARIES, filename), '-C', TARGET]
+                        command = ['tar', 'xf', os.path.join(BINARIES, filename), '-C', target]
                 if subprocess.call(command) == 0:
-                    self.packages[pkg] = data['Version']
-                    # Create symbolic links
-                    if 'Links' in data:
-                        for k, v in data['Links'].iteritems():
-                            source = os.path.join(BASE, v)
-                            target = os.path.join(BASE, k)
-                            if verbose:
-                                print('Creating a symbolic link ' + target + ' -> ' + source)
-                            if os.path.exists(target):
-                                os.remove(target)
-                            os.symlink(source, target)
-                    # Create desktop files
-                    if 'DesktopFile' in data and 'Exec' in data['DesktopFile']:
-                        if verbose:
-                            print('Creating a desktop file ' + os.path.join(DESKTOP, pkg + '.desktop'))
-                        desktop = data['DesktopFile']
-                        with open(os.path.join(DESKTOP, pkg + '.desktop'), "w") as desktopfile:
-                            desktopfile.write("[Desktop Entry]\n")
-                            desktopfile.write("Type=Application\n")
-                            desktopfile.write("Name=" + data['Name'] + "\n")
-                            if 'Comment' in desktop:
-                                desktopfile.write("Comment=" + desktop['Comment'] + "\n")
-                            if 'Categories' in desktop:
-                                desktopfile.write("Categories=" + desktop['Categories'] + "\n")
-                            desktopfile.write("Exec=" + os.path.join(BASE, desktop['Exec']) + "\n")
-                            if 'Icon' in desktop:
-                                desktopfile.write("Icon=" + os.path.join(BASE, desktop['Icon']) + "\n")
-                            desktopfile.write("Terminal=false\n")
-                            desktopfile.write("StartupNotify=true\n")
-                    with open(INSTALLED_INDEX, "w") as installed:
-                        for k, v in self.packages.iteritems():
-                            installed.write(k + " " + v + "\n")
-                    if not quiet:
-                        print(pkg + " installation complete.")
+                    command_succeed = True
+        if command_succeed:
+            self.packages[name] = data['Version']
+            # Create symbolic links
+            if 'Symlink' in data:
+                for name in data['Symlink']:
+                    source = os.path.join(target, folder, name)
+                    link = os.path.join(BASE, 'bin', name)
+                    if verbose:
+                        print('Creating a symbolic link ' + link + ' -> ' + source)
+                    if os.path.exists(link):
+                        os.remove(link)
+                    os.symlink(source, link)
+            # Create desktop files
+            if 'DesktopFile' in data and 'Exec' in data['DesktopFile']:
+                if verbose:
+                    print('Creating a desktop file ' + os.path.join(DESKTOP, name + '.desktop'))
+                desktop = data['DesktopFile']
+                with open(os.path.join(DESKTOP, name + '.desktop'), "w") as desktopfile:
+                    desktopfile.write("[Desktop Entry]\n")
+                    desktopfile.write("Type=Application\n")
+                    desktopfile.write("Name=" + data['Name'] + "\n")
+                    if 'Comment' in desktop:
+                        desktopfile.write("Comment=" + desktop['Comment'] + "\n")
+                    if 'Categories' in desktop:
+                        desktopfile.write("Categories=" + desktop['Categories'] + "\n")
+                    desktopfile.write("Exec=\"" + os.path.join(target, folder, desktop['Exec']) + "\"\n")
+                    if 'Icon' in desktop:
+                        desktopfile.write("Icon=" + os.path.join(target, folder, desktop['Icon']) + "\n")
+                    desktopfile.write("Terminal=false\n")
+                    desktopfile.write("StartupNotify=true\n")
+            with open(INSTALLED_INDEX, "w") as installed:
+                for k, v in self.packages.iteritems():
+                    installed.write(k + " " + v + "\n")
+            if not quiet:
+                print(name + " installation complete.")
 
     def update(self, args):
         if args.verbose:
