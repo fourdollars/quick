@@ -151,6 +151,7 @@ class Quick(object):
             with open(INSTALLED_INDEX, "w") as installed:
                 for k, v in self.packages.iteritems():
                     installed.write(k + " " + v + "\n")
+            shutil.copy(os.path.join(PACKAGES, name + '.yaml'), os.path.join(INSTALLED, name + '.yaml'))
             if not quiet:
                 print(name + " installation complete.")
 
@@ -211,9 +212,31 @@ class Quick(object):
                 print(name + " " + version)
 
     def remove(self, args):
-        # TODO
-        for pkg in args.packages:
-            print("Remove " + pkg)
+        for name in args.packages:
+            if name in self.packages:
+                print("Removing " + name)
+                data = yaml.load(open(os.path.join(INSTALLED, name + '.yaml')).read())
+                if 'Symlink' in data:
+                    for symlink in data['Symlink']:
+                        path = os.path.join(BASE, 'bin', symlink)
+                        if os.path.exists(path):
+                            os.remove(path)
+                if 'DesktopFile' in data:
+                    path = os.path.join(DESKTOP, name + '.desktop')
+                    if os.path.exists(path):
+                        os.remove(path)
+                path = os.path.join(TARGET, name)
+                if os.path.exists(path):
+                    shutil.rmtree(path)
+                del self.packages[name]
+                with open(INSTALLED_INDEX, "w") as installed:
+                    for k, v in self.packages.iteritems():
+                        installed.write(k + " " + v + "\n")
+                if len(self.packages) == 0:
+                        open(INSTALLED_INDEX, 'w').close()
+                print(name + " is removed.")
+            else:
+                print("There is no such package named as " + name + ".")
 
     def upgrade(self, args):
         # TODO
