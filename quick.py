@@ -119,9 +119,9 @@ class Quick(object):
             self.packages[name] = data['Version']
             # Create symbolic links
             if 'Symlink' in data:
-                for name in data['Symlink']:
-                    source = os.path.join(target, folder, name)
-                    link = os.path.join(BASE, 'bin', name)
+                for symlink in data['Symlink']:
+                    source = os.path.join(target, folder, symlink)
+                    link = os.path.join(BASE, 'bin', symlink)
                     if verbose:
                         print('Creating a symbolic link ' + link + ' -> ' + source)
                     if os.path.exists(link):
