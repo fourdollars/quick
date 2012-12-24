@@ -130,7 +130,7 @@ class Quick(object):
             if 'Symlink' in data:
                 for symlink in data['Symlink']:
                     source = os.path.join(target, folder, symlink)
-                    link = os.path.join(BASE, 'bin', symlink)
+                    link = os.path.join(BASE, 'bin', os.path.basename(symlink))
                     if verbose:
                         print(' Creating a symbolic link ' + link + ' -> ' + source)
                     if os.path.exists(link):
