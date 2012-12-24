@@ -43,3 +43,24 @@ Remove packages.
 More usage
 
     $ quick
+
+## Package
+
+You are welcome to provide more packages to Quick.
+
+Please refer to the files of https://github.com/fourdollars/quick/tree/master/packages
+
+The file name of yaml should meet this regex pattern "^[a-z][-a-z0-9]&#42;\.yaml$".
+
+[Mandatory]
+
+* Name
+* Description
+* Version
+* Download
+
+[Optional]
+
+* Folder
+* Symlink
+* DesktopFile
