@@ -50,7 +50,7 @@ You are welcome to provide more packages to Quick.
 
 Please refer to the files of https://github.com/fourdollars/quick/tree/master/packages
 
-The file name of yaml should meet this regex pattern "^[a-z][-a-z0-9]&#42;\.yaml&#36;".
+The file name of yaml should meet this regex pattern "^[a-z][-a-z0-9]&#42;&#92;.yaml&#36;".
 
 [Mandatory]
 
