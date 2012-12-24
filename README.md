@@ -20,4 +20,26 @@ Quick is an installation helper to download and install binary packages from Int
 
 ## Usage
 
+Update packages list.
+
+    $ quick update
+
+List available packages.
+
+    $ quick list
+
+Search for packages.
+
+    $ quick search text
+
+Install packages.
+
+    $ quick install sublime-text
+
+Remove packages.
+
+    $ quick remove sublime-text
+
+More usage
+
     $ quick
