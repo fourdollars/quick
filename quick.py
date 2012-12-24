@@ -71,13 +71,21 @@ class Quick(object):
                     match.append(pkg.split('.')[0])
         return match
 
-    def installpkg(self, name, quiet=False, verbose=False):
+    def installpkg(self, name, quiet=False, verbose=False, upgrade=False):
         data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
         folder = ''
         if 'Folder' in data:
             folder = data['Folder']
         target = os.path.join(TARGET, name)
         command_succeed = False
+        if not quiet:
+            if upgrade:
+                prefix = "Upgrading "
+                suffix = " to " + data['Version']
+            else:
+                prefix = "Installing "
+                suffix = " " + data['Version']
+            print(prefix + name + suffix)
         for item in data['Download']:
             url = None
             arch = None
@@ -95,12 +103,12 @@ class Quick(object):
                 # Don't download binary package again.
                 if not os.path.exists(os.path.join(BINARIES, filename)):
                     if verbose:
-                        print('Downloading ' + url + ' to ' + os.path.join(BINARIES, filename))
+                        print(' Downloading ' + url + ' to ' + os.path.join(BINARIES, filename))
                     elif not quiet:
-                        print('Downloading ' + url)
+                        print(' Downloading ' + url)
                     urllib.urlretrieve(url, os.path.join(BINARIES, filename))
                 if verbose:
-                    print('Uncompressing ' + filename + ' to ' + target)
+                    print(' Uncompressing ' + filename + ' to ' + target)
                 if not os.path.exists(target):
                     os.makedirs(target)
                 command = None
@@ -124,14 +132,14 @@ class Quick(object):
                     source = os.path.join(target, folder, symlink)
                     link = os.path.join(BASE, 'bin', symlink)
                     if verbose:
-                        print('Creating a symbolic link ' + link + ' -> ' + source)
+                        print(' Creating a symbolic link ' + link + ' -> ' + source)
                     if os.path.exists(link):
                         os.remove(link)
                     os.symlink(source, link)
             # Create desktop files
             if 'DesktopFile' in data and 'Exec' in data['DesktopFile']:
                 if verbose:
-                    print('Creating a desktop file ' + os.path.join(DESKTOP, name + '.desktop'))
+                    print(' Creating a desktop file ' + os.path.join(DESKTOP, name + '.desktop'))
                 desktop = data['DesktopFile']
                 with open(os.path.join(DESKTOP, name + '.desktop'), "w") as desktopfile:
                     desktopfile.write("[Desktop Entry]\n")
@@ -148,7 +156,11 @@ class Quick(object):
                     desktopfile.write("StartupNotify=true\n")
             shutil.copy(os.path.join(PACKAGES, name + '.yaml'), os.path.join(INSTALLED, name + '.yaml'))
             if not quiet:
-                print(name + " installation complete.")
+                if upgrade:
+                    action = " upgraded."
+                else:
+                    action = " installed."
+                print(" " + name + action)
 
     def removepkg(self, name):
         pkg = os.path.join(INSTALLED, name + '.yaml')
@@ -219,14 +231,12 @@ class Quick(object):
                     name = name.split('.')[0]
                     if name == pkg:
                         if args.force:
-                            self.installpkg(pkg, args.quiet, args.verbose)
+                            self.installpkg(name, args.quiet, args.verbose)
                         else:
-                            for pkg in self.packages.keys():
-                                if pkg == name and not self.installable(name):
-                                    print(name + " is the latest version.")
-                                    break
+                            if self.installable(name):
+                                self.installpkg(name, args.quiet, args.verbose)
                             else:
-                                self.installpkg(pkg, args.quiet, args.verbose)
+                                print(name + " is the latest version.")
     def installed(self, args):
         for name, version in self.packages.iteritems():
             if args.verbose:
@@ -240,16 +250,18 @@ class Quick(object):
             if name in self.packages:
                 print("Removing " + name)
                 self.removepkg(name)
-                print(name + " is removed.")
+                print(" " + name + " is removed.")
             else:
-                print("There is no such package named as " + name + ".")
+                print(name + " is not installed.")
 
     def upgrade(self, args):
         if not os.path.exists(PAKCAGES_INDEX):
             print('Please execute `quick update` to fetch the packages list first.')
         else:
-            # TODO
-            print("Upgrade all packages.")
+            for name, version in self.packages.iteritems():
+                if self.installable(name):
+                    self.removepkg(name)
+                    self.installpkg(name, args.quiet, args.verbose, upgrade=True)
 
     def self_upgrade(self, args):
         print('Fetching ' + QUICK + ' and saving to ' + PROGRAM)
@@ -323,9 +335,7 @@ class Quick(object):
         command.set_defaults(func=self.installed, parser=parser)
 
         command = subparsers.add_parser('remove', help='remove is identical to install except that packages are removed instead of installed.')
-        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
-        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
-        command.add_argument('packages', nargs='*')
+        command.add_argument('packages', nargs='+')
         command.set_defaults(func=self.remove, parser=parser)
 
         command = subparsers.add_parser('upgrade', help='upgrade is used to install the newest versions of all packages currently installed.')
