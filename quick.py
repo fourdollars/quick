@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, os, re, shutil, stat, subprocess, sys, urllib, yaml
+import argparse, glob, os, re, shutil, stat, subprocess, sys, urllib, yaml
 
 QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
 INDEX = '.index'
@@ -30,7 +30,6 @@ TARGET = os.path.join(BASE, 'lib', 'quick')
 PACKAGES = os.path.join(DATA, 'packages')
 PAKCAGES_INDEX = os.path.join(PACKAGES, '.index')
 INSTALLED = os.path.join(DATA, 'installed')
-INSTALLED_INDEX = os.path.join(INSTALLED, '.index')
 BINARIES = os.path.join(DATA, 'binaries')
 
 class Quick(object):
@@ -148,15 +147,13 @@ class Quick(object):
                         desktopfile.write("Icon=" + os.path.join(target, folder, desktop['Icon']) + "\n")
                     desktopfile.write("Terminal=false\n")
                     desktopfile.write("StartupNotify=true\n")
-            with open(INSTALLED_INDEX, "w") as installed:
-                for k, v in self.packages.iteritems():
-                    installed.write(k + " " + v + "\n")
             shutil.copy(os.path.join(PACKAGES, name + '.yaml'), os.path.join(INSTALLED, name + '.yaml'))
             if not quiet:
                 print(name + " installation complete.")
 
     def removepkg(self, name):
-        data = yaml.load(open(os.path.join(INSTALLED, name + '.yaml')).read())
+        pkg = os.path.join(INSTALLED, name + '.yaml')
+        data = yaml.load(open(pkg).read())
         if 'Symlink' in data:
             for symlink in data['Symlink']:
                 path = os.path.join(BASE, 'bin', symlink)
@@ -170,11 +167,8 @@ class Quick(object):
         if os.path.exists(path):
             shutil.rmtree(path)
         del self.packages[name]
-        with open(INSTALLED_INDEX, "w") as installed:
-            for k, v in self.packages.iteritems():
-                installed.write(k + " " + v + "\n")
-        if len(self.packages) == 0:
-                open(INSTALLED_INDEX, 'w').close()
+        if os.path.exists(pkg):
+            os.remove(pkg)
 
     def update(self, args):
         if args.verbose:
@@ -216,16 +210,14 @@ class Quick(object):
                     if args.force:
                         self.installpkg(pkg, args.quiet, args.verbose)
                     else:
-                        for installed in open(INSTALLED_INDEX).read().splitlines():
-                            if installed.split(' ')[0] == name and not self.installable(name):
+                        for pkg in self.packages.keys():
+                            if pkg == name and not self.installable(name):
                                 print(name + " is the latest version.")
                                 break
                         else:
                             self.installpkg(pkg, args.quiet, args.verbose)
     def installed(self, args):
-        for installed in open(INSTALLED_INDEX).read().splitlines():
-            field = installed.split(' ')
-            name, version = field[0:2]
+        for name, version in self.packages.iteritems():
             if args.verbose:
                 self.showpkg(name, version)
                 print('')
@@ -268,17 +260,16 @@ class Quick(object):
             os.makedirs(DESKTOP)
         if not os.path.exists(INSTALLED):
             os.makedirs(INSTALLED)
-        if not os.path.exists(INSTALLED_INDEX):
-            open(INSTALLED_INDEX, 'w').close()
 
     def __init__(self):
         self.packages = {}
 
         self.sanity_check()
 
-        for installed in open(INSTALLED_INDEX).read().splitlines():
-            field = installed.split(' ')
-            name, version = field
+        for pkg in glob.glob(INSTALLED + "/*.yaml"):
+            data = yaml.load(open(pkg).read())
+            name = os.path.basename(pkg).split('.')[0]
+            version = data['Version']
             self.packages[name] = version
 
         parser = argparse.ArgumentParser(prog='quick', description='Quick is an installation helper to download and install binary packages from Internet to ~/.local')
