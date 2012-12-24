@@ -18,6 +18,8 @@ Quick is an installation helper to download and install binary packages from Int
 
     $ wget https://raw.github.com/fourdollars/quick/master/quick-installer.sh -O - | bash -
 
+And then logout the system and login the system again.
+
 ## Usage
 
 Update packages list.
