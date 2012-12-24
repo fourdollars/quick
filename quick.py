@@ -155,6 +155,27 @@ class Quick(object):
             if not quiet:
                 print(name + " installation complete.")
 
+    def removepkg(self, name):
+        data = yaml.load(open(os.path.join(INSTALLED, name + '.yaml')).read())
+        if 'Symlink' in data:
+            for symlink in data['Symlink']:
+                path = os.path.join(BASE, 'bin', symlink)
+                if os.path.exists(path):
+                    os.remove(path)
+        if 'DesktopFile' in data:
+            path = os.path.join(DESKTOP, name + '.desktop')
+            if os.path.exists(path):
+                os.remove(path)
+        path = os.path.join(TARGET, name)
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        del self.packages[name]
+        with open(INSTALLED_INDEX, "w") as installed:
+            for k, v in self.packages.iteritems():
+                installed.write(k + " " + v + "\n")
+        if len(self.packages) == 0:
+                open(INSTALLED_INDEX, 'w').close()
+
     def update(self, args):
         if args.verbose:
             print('[INDEX] Fetching ' + REMOTE_INDEX + ' and saving to ' + PAKCAGES_INDEX)
@@ -215,25 +236,7 @@ class Quick(object):
         for name in args.packages:
             if name in self.packages:
                 print("Removing " + name)
-                data = yaml.load(open(os.path.join(INSTALLED, name + '.yaml')).read())
-                if 'Symlink' in data:
-                    for symlink in data['Symlink']:
-                        path = os.path.join(BASE, 'bin', symlink)
-                        if os.path.exists(path):
-                            os.remove(path)
-                if 'DesktopFile' in data:
-                    path = os.path.join(DESKTOP, name + '.desktop')
-                    if os.path.exists(path):
-                        os.remove(path)
-                path = os.path.join(TARGET, name)
-                if os.path.exists(path):
-                    shutil.rmtree(path)
-                del self.packages[name]
-                with open(INSTALLED_INDEX, "w") as installed:
-                    for k, v in self.packages.iteritems():
-                        installed.write(k + " " + v + "\n")
-                if len(self.packages) == 0:
-                        open(INSTALLED_INDEX, 'w').close()
+                self.removepkg(name)
                 print(name + " is removed.")
             else:
                 print("There is no such package named as " + name + ".")
@@ -243,10 +246,7 @@ class Quick(object):
         print("Upgrade all packages.")
 
     def self_upgrade(self, args):
-        if args.verbose:
-            print('Fetching ' + QUICK + ' and saving to ' + PROGRAM)
-        elif not args.quiet:
-            print('Fetching ' + QUICK)
+        print('Fetching ' + QUICK + ' and saving to ' + PROGRAM)
         urllib.urlretrieve(QUICK, PROGRAM)
         st = os.stat(PROGRAM)
         os.chmod(PROGRAM, st.st_mode | stat.S_IEXEC)
@@ -320,7 +320,6 @@ class Quick(object):
         command = subparsers.add_parser('remove', help='remove is identical to install except that packages are removed instead of installed.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
-        command.add_argument("-a", "--all", help="remove all packages.", action="store_true")
         command.add_argument('packages', nargs='*')
         command.set_defaults(func=self.remove, parser=parser)
 
@@ -330,13 +329,9 @@ class Quick(object):
         command.set_defaults(func=self.upgrade, parser=parser)
 
         command = subparsers.add_parser('self-upgrade', help='self-upgrade is used to upgrade this program itself.')
-        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
-        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         command.set_defaults(func=self.self_upgrade, parser=parser)
 
         command = subparsers.add_parser('clean', help='clean clears out the local repository of retrieved package files.')
-        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
-        command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         command.set_defaults(func=self.clean, parser=parser)
 
         if len(sys.argv) == 1:
