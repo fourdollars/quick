@@ -184,37 +184,49 @@ class Quick(object):
             urllib.urlretrieve(REMOTE + line, os.path.join(PACKAGES, line))
 
     def list(self, args):
-        for pkg in open(PAKCAGES_INDEX).read().splitlines():
-            data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
-            print(pkg.split('.')[0] + " - " + data['Description'])
+        if not os.path.exists(PAKCAGES_INDEX):
+            print('Please execute `quick update` to fetch the packages list first.')
+        else:
+            for pkg in open(PAKCAGES_INDEX).read().splitlines():
+                data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
+                print(pkg.split('.')[0] + " - " + data['Description'])
 
     def search(self, args):
-        if args.pattern:
-            names = self.searchpkg(args.pattern)
-            for name in names:
-                self.showpkg(name)
-                print('')
+        if not os.path.exists(PAKCAGES_INDEX):
+            print('Please execute `quick update` to fetch the packages list first.')
+        else:
+            if args.pattern:
+                names = self.searchpkg(args.pattern)
+                for name in names:
+                    self.showpkg(name)
+                    print('')
 
     def info(self, args):
-        if args.packages:
-            for pkg in args.packages:
-                self.showpkg(pkg)
-                print('')
+        if not os.path.exists(PAKCAGES_INDEX):
+            print('Please execute `quick update` to fetch the packages list first.')
+        else:
+            if args.packages:
+                for pkg in args.packages:
+                    self.showpkg(pkg)
+                    print('')
 
     def install(self, args):
-        for pkg in args.packages:
-            for name in open(PAKCAGES_INDEX).read().splitlines():
-                name = name.split('.')[0]
-                if name == pkg:
-                    if args.force:
-                        self.installpkg(pkg, args.quiet, args.verbose)
-                    else:
-                        for pkg in self.packages.keys():
-                            if pkg == name and not self.installable(name):
-                                print(name + " is the latest version.")
-                                break
-                        else:
+        if not os.path.exists(PAKCAGES_INDEX):
+            print('Please execute `quick update` to fetch the packages list first.')
+        else:
+            for pkg in args.packages:
+                for name in open(PAKCAGES_INDEX).read().splitlines():
+                    name = name.split('.')[0]
+                    if name == pkg:
+                        if args.force:
                             self.installpkg(pkg, args.quiet, args.verbose)
+                        else:
+                            for pkg in self.packages.keys():
+                                if pkg == name and not self.installable(name):
+                                    print(name + " is the latest version.")
+                                    break
+                            else:
+                                self.installpkg(pkg, args.quiet, args.verbose)
     def installed(self, args):
         for name, version in self.packages.iteritems():
             if args.verbose:
@@ -233,8 +245,11 @@ class Quick(object):
                 print("There is no such package named as " + name + ".")
 
     def upgrade(self, args):
-        # TODO
-        print("Upgrade all packages.")
+        if not os.path.exists(PAKCAGES_INDEX):
+            print('Please execute `quick update` to fetch the packages list first.')
+        else:
+            # TODO
+            print("Upgrade all packages.")
 
     def self_upgrade(self, args):
         print('Fetching ' + QUICK + ' and saving to ' + PROGRAM)
