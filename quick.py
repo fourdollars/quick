@@ -19,9 +19,8 @@
 import argparse, glob, os, re, shutil, stat, subprocess, sys, urllib, yaml
 
 QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
-INDEX = '.index'
 REMOTE = 'https://raw.github.com/fourdollars/quick/master/packages/'
-REMOTE_INDEX = REMOTE + INDEX
+REMOTE_INDEX = REMOTE + '.index'
 BASE = os.path.join(os.getenv('HOME'), '.local')
 PROGRAM = os.path.join(BASE, 'bin', 'quick')
 DATA = os.path.join(BASE, 'share', 'quick')
