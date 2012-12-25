@@ -227,8 +227,13 @@ class Quick(object):
             print('Please execute `quick update` to fetch the packages list first.')
         else:
             for pkg in open(PAKCAGES_INDEX).read().splitlines():
-                data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
-                print(pkg.split('.')[0] + " - " + data['Description'])
+                name = pkg.split('.')[0]
+                if args.verbose:
+                    self.showpkg(name)
+                    print('')
+                else:
+                    data = yaml.load(open(os.path.join(PACKAGES, pkg)).read())
+                    print(name + " - " + data['Description'])
 
     def search(self, args):
         if not os.path.exists(PAKCAGES_INDEX):
@@ -334,7 +339,6 @@ class Quick(object):
         command.set_defaults(func=self.update, parser=parser)
 
         command = subparsers.add_parser('list', help='list prints out an available packages list to stdout.')
-        command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         command.set_defaults(func=self.list, parser=parser)
 
