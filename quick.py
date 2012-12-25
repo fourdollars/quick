@@ -16,7 +16,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import argparse, glob, os, re, shutil, stat, subprocess, sys, urllib, yaml
+import argparse
+import glob
+import hashlib
+import os
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import urllib
+import yaml
 
 QUICK = 'https://raw.github.com/fourdollars/quick/master/quick.py'
 REMOTE = 'https://raw.github.com/fourdollars/quick/master/packages/'
@@ -71,7 +81,21 @@ class Quick(object):
                     match.append(pkg.split('.')[0])
         return match
 
-    def installpkg(self, name, quiet=False, verbose=False, upgrade=False):
+    def valid_file(self, filename, sha1sum, skip_sha1=False):
+        if not os.path.exists(os.path.join(BINARIES, filename)):
+            return False
+        if skip_sha1:
+            return True
+        print(" Checking sha1sum.")
+        sha1 = hashlib.sha1()
+        f = open(filename, 'rb')
+        try:
+            sha1.update(f.read())
+        finally:
+            f.close()
+        return sha1.hexdigest() == sha1sum
+
+    def installpkg(self, name, quiet=False, verbose=False, upgrade=False, skip_sha1=False):
         data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
         folder = ''
         if 'Folder' in data:
@@ -90,18 +114,14 @@ class Quick(object):
             url = None
             arch = None
             sha1 = None
-            try:
-                # TODO: check sha1sum
-                url, arch, sha1 = item.split(' ')
-            except:
-                url, arch = item.split(' ')
+            url, arch, sha1 = item.split(' ')
             if arch == 'all' or arch == os.uname()[4]:
                 folder = ''
                 if 'Folder' in data:
                     folder = data['Folder']
                 filename = os.path.basename(url)
-                # Don't download binary package again.
-                if not os.path.exists(os.path.join(BINARIES, filename)):
+                # Don't download binary package again if the file is valid.
+                if not self.valid_file(os.path.join(BINARIES, filename), sha1, skip_sha1):
                     if verbose:
                         print(' Downloading ' + url + ' to ' + os.path.join(BINARIES, filename))
                     elif not quiet:
@@ -231,7 +251,7 @@ class Quick(object):
                     name = name.split('.')[0]
                     if name == pkg:
                         if args.force:
-                            self.installpkg(name, args.quiet, args.verbose)
+                            self.installpkg(name, args.quiet, args.verbose, skip_sha1=args.skip)
                         else:
                             if self.installable(name):
                                 self.installpkg(name, args.quiet, args.verbose)
@@ -267,7 +287,7 @@ class Quick(object):
             for name, version in self.packages.iteritems():
                 if self.installable(name):
                     self.removepkg(name)
-                    self.installpkg(name, args.quiet, args.verbose, upgrade=True)
+                    self.installpkg(name, args.quiet, args.verbose, upgrade=True, skip_sha1=args.skip)
 
     def self_upgrade(self, args):
         print('Fetching ' + QUICK + ' and saving to ' + PROGRAM)
@@ -333,6 +353,7 @@ class Quick(object):
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         command.add_argument("-f", "--force", help="force install.", action="store_true")
+        command.add_argument("-s", "--skip", help="skip sha1 check.", action="store_true")
         command.add_argument('packages', nargs='+')
         command.set_defaults(func=self.install, parser=parser)
 
@@ -348,6 +369,7 @@ class Quick(object):
         command = subparsers.add_parser('upgrade', help='upgrade is used to install the newest versions of all packages currently installed.')
         command.add_argument("-q", "--quiet", help="Quiet; produces output suitable for logging, omitting progress indicators.", action="store_true")
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
+        command.add_argument("-s", "--skip", help="skip sha1 check.", action="store_true")
         command.set_defaults(func=self.upgrade, parser=parser)
 
         command = subparsers.add_parser('self-upgrade', help='self-upgrade is used to upgrade this program itself.')
