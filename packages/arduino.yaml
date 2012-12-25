@@ -1,5 +1,5 @@
 Name: Arduino
-Description: Arduino is an open-source electronics prototyping platform based on flexible, easy-to-use hardware and software. It's intended for artists, designers, hobbyists, and anyone interested in creating interactive objects or environments.
+Description: Arduino is an open-source electronics prototyping platform based on flexible, easy-to-use hardware and software.
 Homepage: http://www.arduino.cc/
 Version: 1.0.3
 Download:
@@ -8,7 +8,7 @@ Download:
 Symlink:
   - arduino
 DesktopFile:
-  Comment: Arduino is an open-source electronics prototyping platform based on flexible, easy-to-use hardware and software. It's intended for artists, designers, hobbyists, and anyone interested in creating interactive objects or environments.
+  Comment: Arduino is an open-source electronics prototyping platform based on flexible, easy-to-use hardware and software.
   Exec: arduino
   Categories: Development;
   Icon: reference/img/logo.png
