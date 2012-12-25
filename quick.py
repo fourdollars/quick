@@ -203,6 +203,13 @@ class Quick(object):
 
     def update(self, args):
         if args.verbose:
+            print('[QUICK] Fetching ' + QUICK + ' and saving to ' + PROGRAM)
+        elif not args.quiet:
+            print('[QUICK] Fetching ' + QUICK)
+        urllib.urlretrieve(QUICK, PROGRAM)
+        st = os.stat(PROGRAM)
+        os.chmod(PROGRAM, st.st_mode | stat.S_IEXEC)
+        if args.verbose:
             print('[INDEX] Fetching ' + REMOTE_INDEX + ' and saving to ' + PAKCAGES_INDEX)
         elif not args.quiet:
             print('[INDEX] Fetching ' + REMOTE_INDEX)
@@ -289,12 +296,6 @@ class Quick(object):
                     self.removepkg(name)
                     self.installpkg(name, args.quiet, args.verbose, upgrade=True, skip_sha1=args.skip)
 
-    def self_upgrade(self, args):
-        print('Fetching ' + QUICK + ' and saving to ' + PROGRAM)
-        urllib.urlretrieve(QUICK, PROGRAM)
-        st = os.stat(PROGRAM)
-        os.chmod(PROGRAM, st.st_mode | stat.S_IEXEC)
-
     def clean(self, args):
         if os.path.exists(PACKAGES):
             shutil.rmtree(PACKAGES)
@@ -371,9 +372,6 @@ class Quick(object):
         command.add_argument("-v", "--verbose", help="increase output verbosity.", action="store_true")
         command.add_argument("-s", "--skip", help="skip sha1 check.", action="store_true")
         command.set_defaults(func=self.upgrade, parser=parser)
-
-        command = subparsers.add_parser('self-upgrade', help='self-upgrade is used to upgrade this program itself.')
-        command.set_defaults(func=self.self_upgrade, parser=parser)
 
         command = subparsers.add_parser('clean', help='clean clears out the local repository of retrieved package files.')
         command.set_defaults(func=self.clean, parser=parser)
