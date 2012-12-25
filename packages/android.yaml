@@ -1,0 +1,38 @@
+Name: Android Developer Tools
+Description: The Android SDK provides you the API libraries and developer tools necessary to build, test, and debug apps for Android.
+Homepage: http://developer.android.com/sdk/index.html
+Version: 21.0.1
+Download:
+  - http://dl.google.com/android/adt/adt-bundle-linux-x86.zip i386 93833db95836e7fca4a7d6f611b63aa76cbf5ef0 adt-bundle-linux-x86
+  - http://dl.google.com/android/adt/adt-bundle-linux-x86_64.zip x86_64 d4e6082b117c5f90e1ef6c6dfc5c77b86ef14214 adt-bundle-linux-x86_64
+Symlink:
+  - eclipse/eclipse
+  - sdk/tools/android
+  - sdk/tools/apkbuilder
+  - sdk/tools/ddms
+  - sdk/tools/dmtracedump
+  - sdk/tools/draw9patch
+  - sdk/tools/emulator
+  - sdk/tools/emulator64-arm
+  - sdk/tools/emulator64-mips
+  - sdk/tools/emulator64-x86
+  - sdk/tools/emulator-arm
+  - sdk/tools/emulator-mips
+  - sdk/tools/emulator-x86
+  - sdk/tools/etc1tool
+  - sdk/tools/hierarchyviewer
+  - sdk/tools/hprof-conv
+  - sdk/tools/jobb
+  - sdk/tools/lint
+  - sdk/tools/mksdcard
+  - sdk/tools/monitor
+  - sdk/tools/monkeyrunner
+  - sdk/tools/sqlite3
+  - sdk/tools/traceview
+  - sdk/tools/uiautomatorviewer
+  - sdk/tools/zipalign
+DesktopFile:
+  Comment: The Android SDK provides you the API libraries and developer tools necessary to build, test, and debug apps for Android.
+  Exec: eclipse/eclipse
+  Categories: Development;
+  Icon: eclipse/plugins/org.eclipse.platform_3.8.0.v201206081200/eclipse256.png

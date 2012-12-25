@@ -3,11 +3,10 @@ Description: Arduino is an open-source electronics prototyping platform based on
 Homepage: http://www.arduino.cc/
 Version: 1.0.3
 Download:
-  - http://arduino.googlecode.com/files/arduino-1.0.3-linux32.tgz i386 e19e3418ba3d6fa88268fca9551d936f7368223f
-  - http://arduino.googlecode.com/files/arduino-1.0.3-linux64.tgz x86_64 678e3f2255f37da295433edfa45a49cc587daa34
+  - http://arduino.googlecode.com/files/arduino-1.0.3-linux32.tgz i386 e19e3418ba3d6fa88268fca9551d936f7368223f arduino-1.0.3
+  - http://arduino.googlecode.com/files/arduino-1.0.3-linux64.tgz x86_64 678e3f2255f37da295433edfa45a49cc587daa34 arduino-1.0.3
 Symlink:
   - arduino
-Folder: arduino-1.0.3
 DesktopFile:
   Comment: Arduino is an open-source electronics prototyping platform based on flexible, easy-to-use hardware and software. It's intended for artists, designers, hobbyists, and anyone interested in creating interactive objects or environments.
   Exec: arduino

@@ -103,8 +103,6 @@ class Quick(object):
     def installpkg(self, name, quiet=False, verbose=False, upgrade=False, skip_sha1=False):
         data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
         folder = ''
-        if 'Folder' in data:
-            folder = data['Folder']
         target = os.path.join(TARGET, name)
         command_succeed = False
         if not quiet:
@@ -116,14 +114,12 @@ class Quick(object):
                 suffix = " " + data['Version']
             print(prefix + name + suffix)
         for item in data['Download']:
-            url = None
-            arch = None
-            sha1 = None
-            url, arch, sha1 = item.split(' ')
+            field = item.split(' ')
+            url = field[0]
+            arch = field[1]
+            sha1 = field[2]
+            folder = ' '.join(field[3:])
             if arch == 'all' or arch == os.uname()[4]:
-                folder = ''
-                if 'Folder' in data:
-                    folder = data['Folder']
                 filename = os.path.basename(url)
                 # Don't download binary package again if the file is valid.
                 if not self.valid_file(os.path.join(BINARIES, filename), sha1, skip_sha1):

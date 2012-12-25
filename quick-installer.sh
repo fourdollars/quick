@@ -25,11 +25,7 @@ fi
 ENDLINE
 fi
 
-for path in "$HOME/.local/bin" "$HOME/.local/lib" "$HOME/.local/share/quick/packages" "$HOME/.local/share/quick/binaries"; do
-    if [ ! -d $path ]; then
-        mkdir -p $path
-    fi
-done
+[ ! -d "$HOME/.local/bin" ] && mkdir -p "$HOME/.local/bin"
 
 wget https://raw.github.com/fourdollars/quick/master/quick.py -O $HOME/.local/bin/quick && chmod +x $HOME/.local/bin/quick
 
