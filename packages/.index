@@ -2,4 +2,5 @@ appengine-go.yaml
 appengine-java.yaml
 appengine-python.yaml
 play-framework.yaml
+processing.yaml
 sublime-text.yaml
