@@ -35,4 +35,4 @@ DesktopFile:
   Comment: The Android SDK provides you the API libraries and developer tools necessary to build, test, and debug apps for Android.
   Exec: eclipse/eclipse
   Categories: Development;
-  Icon: eclipse/plugins/org.eclipse.platform_3.8.0.v201206081200/eclipse256.png
+  Icon: eclipse/plugins/com.android.ide.eclipse.adt.package_21.0.1.2012-12-6-2-58/icons/adt.png
