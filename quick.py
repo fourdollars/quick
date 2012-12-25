@@ -43,6 +43,11 @@ BINARIES = os.path.join(DATA, 'binaries')
 
 class Quick(object):
 
+    def reporthook(self, count, blockSize, totalSize):
+        percent = int(count*blockSize*100/totalSize)
+        sys.stdout.write("\r %s %2d%%" % ('*' * (percent * 75 / 100), percent))
+        sys.stdout.flush()
+
     def installable(self, name):
         if not os.path.exists(os.path.join(PACKAGES, name + '.yaml')):
             return False
@@ -126,7 +131,8 @@ class Quick(object):
                         print(' Downloading ' + url + ' to ' + os.path.join(BINARIES, filename))
                     elif not quiet:
                         print(' Downloading ' + url)
-                    urllib.urlretrieve(url, os.path.join(BINARIES, filename))
+                    urllib.urlretrieve(url, os.path.join(BINARIES, filename), self.reporthook)
+                    print('')
                 if verbose:
                     print(' Uncompressing ' + filename + ' to ' + target)
                 if not os.path.exists(target):
@@ -177,9 +183,9 @@ class Quick(object):
             shutil.copy(os.path.join(PACKAGES, name + '.yaml'), os.path.join(INSTALLED, name + '.yaml'))
             if not quiet:
                 if upgrade:
-                    action = " upgraded."
+                    action = " is upgraded."
                 else:
-                    action = " installed."
+                    action = " is installed."
                 print(" " + name + action)
 
     def removepkg(self, name):
@@ -269,6 +275,7 @@ class Quick(object):
                                 self.installpkg(name, args.quiet, args.verbose)
                             else:
                                 print(name + " is the latest version.")
+
     def installed(self, args):
         for name, version in self.packages.iteritems():
             if args.verbose:
