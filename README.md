@@ -66,3 +66,9 @@ The file name of yaml should meet this regex pattern "^[a-z][-a-z0-9]&#42;&#92;.
 * Folder
 * Symlink
 * DesktopFile
+
+## Uninstallation
+
+    $ quick self-upgrade
+    $ quick remove -a
+    $ rm -fr ~/.local/bin/quick ~/.local/lib/quick ~/.local/share/quick

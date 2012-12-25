@@ -253,6 +253,12 @@ class Quick(object):
                 print(" " + name + " is removed.")
             else:
                 print(name + " is not installed.")
+        if len(args.packages) == 0 and args.all:
+            packages = self.packages.copy()
+            for name in packages:
+                print("Removing " + name)
+                self.removepkg(name)
+                print(" " + name + " is removed.")
 
     def upgrade(self, args):
         if not os.path.exists(PAKCAGES_INDEX):
@@ -335,7 +341,8 @@ class Quick(object):
         command.set_defaults(func=self.installed, parser=parser)
 
         command = subparsers.add_parser('remove', help='remove is identical to install except that packages are removed instead of installed.')
-        command.add_argument('packages', nargs='+')
+        command.add_argument('packages', nargs='*')
+        command.add_argument("-a", "--all", help="remove all packages.", action="store_true")
         command.set_defaults(func=self.remove, parser=parser)
 
         command = subparsers.add_parser('upgrade', help='upgrade is used to install the newest versions of all packages currently installed.')
