@@ -189,7 +189,7 @@ class Quick(object):
         data = yaml.load(open(pkg).read())
         if 'Symlink' in data:
             for symlink in data['Symlink']:
-                path = os.path.join(BASE, 'bin', symlink)
+                path = os.path.join(BASE, 'bin', os.path.basename(symlink))
                 if os.path.exists(path):
                     os.remove(path)
         if 'DesktopFile' in data:
