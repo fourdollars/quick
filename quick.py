@@ -119,7 +119,8 @@ class Quick(object):
             arch = field[1]
             sha1 = field[2]
             folder = ' '.join(field[3:])
-            if arch == 'all' or arch == os.uname()[4]:
+            machine = re.sub('^i[4-6]', 'i3', os.uname()[4])
+            if arch == 'all' or arch == machine:
                 filename = os.path.basename(url)
                 # Don't download binary package again if the file is valid.
                 if not self.valid_file(os.path.join(BINARIES, filename), sha1, skip_sha1):
