@@ -1,6 +1,6 @@
 # Quick installation helper for GNU/Linux
 
-## Intrdoduction
+## Introduction
 
 Quick is an installation helper to download and install binary packages from Internet to ~/.local
 
