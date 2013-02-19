@@ -3,6 +3,7 @@ appengine-go.yaml
 appengine-java.yaml
 appengine-python.yaml
 arduino.yaml
+go.yaml
 play-framework-1_2.yaml
 play-framework-2_0.yaml
 play-framework.yaml
