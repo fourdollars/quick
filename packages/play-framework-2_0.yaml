@@ -3,6 +3,6 @@ Description: The Play framework makes it easier to build web applications with J
 Homepage: http://www.playframework.org
 Version: 2.0.4
 Download:
-  - http://download.playframework.org/releases/play-2.0.4.zip all 98cacf40aa2099e01051a2f0b94187dd2fbb729a play-2.0.4
+  - http://downloads.typesafe.com/releases/play-2.0.4.zip all 98cacf40aa2099e01051a2f0b94187dd2fbb729a play-2.0.4
 Symlink:
   - play
