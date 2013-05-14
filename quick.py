@@ -55,7 +55,7 @@ class Quick(object):
             return True
         from pkg_resources import parse_version
         data = yaml.load(open(os.path.join(PACKAGES, name + '.yaml')).read())
-        return parse_version(data['Version']) > parse_version(self.packages[name])
+        return parse_version(str(data['Version'])) > parse_version(self.packages[name])
 
     def showpkg(self, name, version=None):
         if os.path.exists(os.path.join(PACKAGES, name + '.yaml')):
@@ -108,10 +108,10 @@ class Quick(object):
         if not quiet:
             if upgrade:
                 prefix = "Upgrading "
-                suffix = " to " + data['Version']
+                suffix = " to " + str(data['Version'])
             else:
                 prefix = "Installing "
-                suffix = " " + data['Version']
+                suffix = " " + str(data['Version'])
             print(prefix + name + suffix)
         for item in data['Download']:
             field = item.split(' ')
@@ -148,7 +148,7 @@ class Quick(object):
                 if subprocess.call(command) == 0:
                     command_succeed = True
         if command_succeed:
-            self.packages[name] = data['Version']
+            self.packages[name] = str(data['Version'])
             # Create symbolic links
             if 'Symlink' in data:
                 for symlink in data['Symlink']:
@@ -331,7 +331,7 @@ class Quick(object):
         for pkg in glob.glob(INSTALLED + "/*.yaml"):
             data = yaml.load(open(pkg).read())
             name = os.path.basename(pkg).split('.')[0]
-            version = data['Version']
+            version = str(data['Version'])
             self.packages[name] = version
 
         parser = argparse.ArgumentParser(prog='quick', description='Quick is an installation helper to download and install binary packages from Internet to ~/.local')
