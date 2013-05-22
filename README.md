@@ -36,11 +36,11 @@ Search for packages.
 
 Install packages.
 
-    $ quick install sublime-text
+    $ quick install android
 
 Remove packages.
 
-    $ quick remove sublime-text
+    $ quick remove android
 
 More usage
 
