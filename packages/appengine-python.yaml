@@ -1,9 +1,9 @@
 Name: Google App Engine SDK for Python
 Description: Offers users the ability to build and host web applications on Google's infrastructure.
 Homepage: https://developers.google.com/appengine/
-Version: 1.7.7
+Version: 1.8.0
 Download:
-  - http://googleappengine.googlecode.com/files/google_appengine_1.7.7.zip all 030b194351c99a706bbb35af0caf7496ccef319b google_appengine
+  - http://googleappengine.googlecode.com/files/google_appengine_1.8.0.zip all 71b5f3ee06dce0a7d6af32d65ae27272eac038cb google_appengine
 Symlink:
   - api_server.py
   - appcfg.py
