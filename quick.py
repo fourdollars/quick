@@ -65,7 +65,7 @@ class Quick(object):
                 if field is 'Version' and version:
                     print(field + ': ' + version)
                 else:
-                    print(field + ': ' + data[field])
+                    print(field + ': ' + str(data[field]))
         else:
             print(name + ' is not existed.')
 
