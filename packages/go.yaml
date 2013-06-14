@@ -1,10 +1,10 @@
 Name: The Go Programming Language
 Description: Go is an open source programming environment that makes it easy to build simple, reliable, and efficient software.
 Homepage: http://golang.org/
-Version: 1.1
+Version: 1.1.1
 Download:
-  - https://go.googlecode.com/files/go1.1.linux-386.tar.gz i386 8e48c8d6738316c07ad8a3d3714c30fb67afba1d go
-  - https://go.googlecode.com/files/go1.1.linux-amd64.tar.gz x86_64 58087060236614f13d7089d798055b4255ed02ec go
+  - https://go.googlecode.com/files/go1.1.1.linux-386.tar.gz i386 05c427490583b675c0d19065d7860b52a8662ad1 go
+  - https://go.googlecode.com/files/go1.1.1.linux-amd64.tar.gz x86_64 a35374bb290cb6c2a8e3d464ee192fa05a500018 go
 Symlink:
   - bin/go
   - bin/godoc
