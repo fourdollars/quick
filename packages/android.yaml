@@ -8,7 +8,6 @@ Download:
 Symlink:
   - eclipse/eclipse
   - sdk/tools/android
-  - sdk/tools/apkbuilder
   - sdk/tools/ddms
   - sdk/tools/dmtracedump
   - sdk/tools/draw9patch
