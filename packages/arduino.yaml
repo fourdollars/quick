@@ -1,10 +1,10 @@
 Name: Arduino
 Description: Arduino is an open-source electronics prototyping platform based on flexible, easy-to-use hardware and software.
 Homepage: http://www.arduino.cc/
-Version: 1.0.4
+Version: 1.0.5
 Download:
-  - http://arduino.googlecode.com/files/arduino-1.0.4-linux32.tgz i386 b7d8392774033e942736966fe8fa4ddea492d8f8 arduino-1.0.4
-  - http://arduino.googlecode.com/files/arduino-1.0.4-linux64.tgz x86_64 b8574dc4595fa5ea096ee2ad02aa8431f6b3f8fc arduino-1.0.4
+  - http://arduino.googlecode.com/files/arduino-1.0.5-linux32.tgz i386 169035aaffbce881dc24863ebbd06a66679abceb arduino-1.0.5
+  - http://arduino.googlecode.com/files/arduino-1.0.5-linux64.tgz x86_64 1d199c68280449cdfabbd41c04eaf8c88ca87226 arduino-1.0.5
 Symlink:
   - arduino
 DesktopFile:
