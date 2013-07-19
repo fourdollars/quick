@@ -156,7 +156,7 @@ class Quick(object):
                     link = os.path.join(BASE, 'bin', os.path.basename(symlink))
                     if verbose:
                         print(' Creating a symbolic link ' + link + ' -> ' + source)
-                    if os.path.exists(link):
+                    if os.path.exists(link) or os.path.lexists(link):
                         os.remove(link)
                     os.symlink(source, link)
             # Create desktop files
