@@ -1,0 +1,12 @@
+Name: WebStorm — The smartest JavaScript IDE
+Description: Create great web sites in a great IDE. The best JavaScript IDE and HTML editor is at your fingertips.
+Homepage: http://www.jetbrains.com/webstorm/
+Version: 6.0.2a
+Download:
+  - http://download.jetbrains.com/webstorm/WebStorm-6.0.2a.tar.gz all 3310636242bb99e6dce3b5024a7846fbb9cdc6ca WebStorm-129.664
+DesktopFile:
+  Comment: WebStorm — The smartest JavaScript IDE
+Symlink:
+  Exec: bin/webstorm.sh
+  Categories: Development;
+  Icon: bin/webide.png
