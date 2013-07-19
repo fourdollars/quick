@@ -154,11 +154,12 @@ class Quick(object):
                 for symlink in data['Symlink']:
                     source = os.path.join(target, folder, symlink)
                     link = os.path.join(BASE, 'bin', os.path.basename(symlink))
-                    if verbose:
-                        print(' Creating a symbolic link ' + link + ' -> ' + source)
                     if os.path.exists(link) or os.path.lexists(link):
                         os.remove(link)
-                    os.symlink(source, link)
+                    if os.path.exists(source):
+                        if verbose:
+                            print(' Creating a symbolic link ' + link + ' -> ' + source)
+                        os.symlink(source, link)
             # Create desktop files
             if 'DesktopFile' in data and 'Exec' in data['DesktopFile']:
                 if verbose:
@@ -191,7 +192,7 @@ class Quick(object):
         if 'Symlink' in data:
             for symlink in data['Symlink']:
                 path = os.path.join(BASE, 'bin', os.path.basename(symlink))
-                if os.path.exists(path):
+                if os.path.exists(path) or os.path.lexists(path):
                     os.remove(path)
         if 'DesktopFile' in data:
             path = os.path.join(DESKTOP, name + '.desktop')
