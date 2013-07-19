@@ -6,7 +6,6 @@ Download:
   - http://download.jetbrains.com/webstorm/WebStorm-6.0.2a.tar.gz all 3310636242bb99e6dce3b5024a7846fbb9cdc6ca WebStorm-129.664
 DesktopFile:
   Comment: WebStorm — The smartest JavaScript IDE
-Symlink:
   Exec: bin/webstorm.sh
   Categories: Development;
   Icon: bin/webide.png
