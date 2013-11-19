@@ -1,10 +1,10 @@
 Name: Processing
 Description: Processing is an open source programming language and environment for people who want to create images, animations, and interactions.
 Homepage: http://processing.org/
-Version: 2.0.1
+Version: 2.1
 Download:
-  - http://processing.googlecode.com/files/processing-2.0.1-linux32.tgz i386 1bc21e53de8b5de6e8c16c99f79b3110b3d8b989 processing-2.0.1
-  - http://processing.googlecode.com/files/processing-2.0.1-linux64.tgz x86_64 37d80ecb8db94fd4d25726df1ef31adbe7ebb6c1 processing-2.0.1
+  - http://processing.googlecode.com/files/processing-2.1-linux32.tgz i386 627a03cb96722397b69b02debca1de30982fd49d processing-2.1
+  - http://processing.googlecode.com/files/processing-2.1-linux64.tgz x86_64 5245d3ec53b68be26394b79c31b5f14dbe9a0292 processing-2.1
 Symlink:
   - processing
 DesktopFile:
