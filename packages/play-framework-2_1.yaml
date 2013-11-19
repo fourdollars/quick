@@ -1,8 +1,8 @@
 Name: Play Framework
 Description: The Play framework makes it easier to build web applications with Java & Scala.
 Homepage: http://www.playframework.org
-Version: 2.2.1
+Version: 2.1.5
 Download:
-  - http://downloads.typesafe.com/play/2.2.1/play-2.2.1.zip all e4567f3cf61536908d66e85bde48d7e953f0a01f play-2.2.1
+  - http://downloads.typesafe.com/play/2.1.5/play-2.1.5.zip all 0c92e9c0c0e7ddfba0ef8a2f730c5cbcd6ebc377 play-2.1.5
 Symlink:
   - play
