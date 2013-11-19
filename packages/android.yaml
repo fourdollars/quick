@@ -1,10 +1,10 @@
 Name: Android Developer Tools
 Description: The Android SDK provides you the API libraries and developer tools necessary to build, test, and debug apps for Android.
 Homepage: http://developer.android.com/sdk/index.html
-Version: 22.0.1
+Version: 22.3.0
 Download:
-  - http://dl.google.com/android/adt/adt-bundle-linux-x86-20130522.zip i386 424ae9561da33f24f97551e6750062d0e1d46966 adt-bundle-linux-x86-20130522
-  - http://dl.google.com/android/adt/adt-bundle-linux-x86_64-20130522.zip x86_64 5d24011cd499929fabb48fc0fc9a51c228c5756a adt-bundle-linux-x86_64-20130522
+  - http://dl.google.com/android/adt/adt-bundle-linux-x86-20131030.zip i386 429bca9974be2c46a36ab793eb7f523210a45dcf adt-bundle-linux-x86-20131030
+  - http://dl.google.com/android/adt/adt-bundle-linux-x86_64-20131030.zip x86_64 36af5477aea8ce02069bc4448e5bc0697725e983 adt-bundle-linux-x86_64-20131030
 Symlink:
   - eclipse/eclipse
   - sdk/tools/android
@@ -34,4 +34,4 @@ DesktopFile:
   Comment: The Android SDK provides you the API libraries and developer tools necessary to build, test, and debug apps for Android.
   Exec: eclipse/eclipse
   Categories: Development;
-  Icon: eclipse/plugins/com.android.ide.eclipse.adt.package_22.0.1.v201305230001--685705/icons/adt.png
+  Icon: eclipse/plugins/com.android.ide.eclipse.adt.package_22.3.0.v201310242005-887826/icons/adt.png
