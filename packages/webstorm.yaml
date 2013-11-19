@@ -1,9 +1,9 @@
 Name: JetBrains WebStorm
 Description: Create great web sites in a great IDE. The best JavaScript IDE and HTML editor is at your fingertips.
 Homepage: http://www.jetbrains.com/webstorm/
-Version: 6.0.2a
+Version: 7.0.2
 Download:
-  - http://download.jetbrains.com/webstorm/WebStorm-6.0.2a.tar.gz all 3310636242bb99e6dce3b5024a7846fbb9cdc6ca WebStorm-129.664
+  - http://download.jetbrains.com/webstorm/WebStorm-7.0.2.tar.gz all bee302f83894560960a26e9dcb94863c75b8cc5f WebStorm-131.515
 DesktopFile:
   Comment: Create great web sites in a great IDE. The best JavaScript IDE and HTML editor is at your fingertips.
   Exec: bin/webstorm.sh
