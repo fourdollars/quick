@@ -44,9 +44,12 @@ BINARIES = os.path.join(DATA, 'binaries')
 class Quick(object):
 
     def reporthook(self, count, blockSize, totalSize):
-        percent = int(count*blockSize*100/totalSize)
-        sys.stdout.write("\r %s %2d%%" % ('*' * (percent * 75 / 100), percent))
-        sys.stdout.flush()
+        if count * blockSize < totalSize:
+            percent = int(count*blockSize*100/totalSize)
+            sys.stdout.write("\r %s %2d%%" % ('*' * (percent * 75 / 100), percent))
+            sys.stdout.flush()
+        else:
+            print("\r %s %2d%%" % ('*' * 75, 100))
 
     def installable(self, name):
         if not os.path.exists(os.path.join(PACKAGES, name + '.yaml')):
