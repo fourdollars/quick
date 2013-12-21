@@ -1,8 +1,8 @@
 Name: Vert.x
 Description: Vert.x is a lightweight, high performance application platform for the JVM that's designed for modern mobile, web, and enterprise applications.
 Homepage: http://vertx.io/
-Version: 2.1M1
+Version: 2.1M2
 Download:
-  - http://dl.bintray.com/vertx/downloads/vert.x-2.1M1.tar.gz all aeb7b36a15e67f3d15afaadb48bcf3b9819906c9 vert.x-2.1M1
+  - http://dl.bintray.com/vertx/downloads/vert.x-2.1M2.tar.gz all eedfe222212287749b01a3dd53cb8224d896ee1a vert.x-2.1M2
 Symlink:
   - bin/vertx
