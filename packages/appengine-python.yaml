@@ -7,6 +7,7 @@ Download:
 Symlink:
   - api_server.py
   - appcfg.py
+  - backends_conversion.py
   - bulkload_client.py
   - bulkloader.py
   - dev_appserver.py
@@ -14,4 +15,7 @@ Symlink:
   - endpointscfg.py
   - gen_protorpc.py
   - google_sql.py
+  - _php_runtime.py
+  - _python_runtime.py
   - remote_api_shell.py
+  - run_tests.py
